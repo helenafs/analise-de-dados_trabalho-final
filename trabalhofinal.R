@@ -1,0 +1,152 @@
+# install.packages( c( "SAScii" , "downloader" , "survey" , "ggplot2" ) )
+
+
+library(survey) 	# load survey package (analyzes complex design surveys)
+library(SAScii) 	# load the SAScii package (imports ascii data with a SAS script)
+library(downloader)	# downloads and then runs the source() function on scripts from github
+
+tf <- tempfile()
+
+# download the latest pns microdata
+download.file("ftp://ftp.ibge.gov.br/PNS/2013/Microdados/Dados/PNS_2013.zip" , 
+              tf , mode = 'wb' )
+
+# extract all files to the local disk
+setwd ("C:\\Users\\helen\\Documents\\Mestrado\\Análise de Dados\\Trabalho final\\microdados")
+
+z <- unzip("pns_2013_microdados_2017_03_23.zip")
+
+# identify household (domicilio) data file
+dd <- grep("Dados/DOMPNS", z, value = TRUE)
+
+# identify person data file
+pd <- grep("Dados/PESPNS", z, value = TRUE)
+
+# identify household (domicilio) sas import script
+ds <- grep("DOMPNS(.*)\\.sas", z, value = TRUE)
+
+# identify person sas import script
+ps <- grep("PESPNS(.*)\\.sas", z, value = TRUE)
+
+# create a data.frame object `dom` containing one record per household
+dom <- read.SAScii(dd, ds)
+
+# create a data.frame object `pes` containing one record per person
+pessoas <- read.SAScii(pd, ps)
+
+
+# ## Salvar em excel
+#install.packages("writexl")
+#library(writexl)
+
+#write_xlsx(dom, "domicilios.xlsx", use_zip64 = T)
+#write_xlsx(pes, "pessoas.xlsx", use_zip64 = T)
+
+#Selecionar as colunas de interesse
+library(tidyverse)
+glimpse (pessoas)
+
+banco_selecionado <- pessoas %>%
+  select (V0001, C001:G032, M001:N023, W00101:VDDATAM)
+
+#Contar quantas pessoas em cada categoria de deficiência G001 (deficiência intelectual), 
+#G006 (deficiência física),G014 (deficiência auditiva), G021 (deficiência visual)
+
+banco_selecionado %>%
+  count(G001)
+#   G001      n
+#1    1   1596
+#2    2 203950
+
+banco_selecionado %>%
+  count(G006)
+#  G006      n
+#1    1   2611
+#2    2 202935
+
+banco_selecionado %>%
+  count (G014)
+#  G014      n
+#1    1   3373
+#2    2 202173
+
+banco_selecionado %>%
+  count (G021)
+#G021      n
+#1    1   7738
+#2    2 197808
+
+#Recodificar as variáveis G001 (deficiência intelectual), G006 (deficiência física),
+#G014 (deficiência auditiva), G021 (deficiência visual).
+
+
+banco_deficiencia <- banco_selecionado %>%
+  mutate(G001 = case_when  (G001 == "1" ~ "dintelectual",
+                           G001 == "2" ~ "não")) %>%
+  mutate(G006 = case_when(G006 == "1" ~ "dfísica",
+                          G006 == "2" ~ "não")) %>%
+  mutate(G014 = case_when(G014 == "1" ~"dauditiva",
+                          G014 == "2" ~ "não")) %>%
+  mutate(G021 = case_when(G021 == "1" ~ "dvisual",
+                          G021 == "2" ~ "não"))
+as_tibble (banco_deficiencia)
+
+
+#Criar a variável de categorização PCD, categorias: intelectual, auditiva, visual, física 
+#sem deficiência (módulo g)
+#Não consegui encontrar uma função boa para isso. Na internet encontrei a função gather, mas 
+#quando coloco pra pesquisar sobre essa função ele recomenda que se mude para a função
+#pivot_longer(), mas não entendi como usá-la. 
+
+banco_deficiência <- banco_selecionado %>%
+  mutate(deficiencia = case_when(G001 == "1" ~ "dintelectual", 
+                                 G006 == "1" ~ "dfísica",
+                                 G014 == "1" ~"dauditiva", 
+                                 G021 == "1" ~ "dvisual",
+                                 G001 == "2" & G006 == "2" & G014 == "2" & G021 == "2" ~ "nenhum"))
+  
+  mutate(deficiencia = case_when(is.na(deficiencia) ~ "nenhum"))
+
+table(banco_deficiência$deficiencia)
+summary(banco_deficiência$deficiencia)
+sum(is.na(banco_deficiência$deficiencia))
+
+#Criar outra variável com três grupos deficientes com limitação, deficientes sem limitação e 
+#não deficientes. As variáveis que indicam limitação: G004, G009, G017, G026. 
+
+#Criar a variável de renda total (dependente): E01602 (salário principal), 
+#E01604 (produtos principal),E01802 (salário secundário), E01804 (produtos secundário).
+
+#Criar a variável de controle de rendimentos domiciliares não provenientes do trabalho: 
+#F00102 (pensão do governo),F00702 (doação), F00802 (aluguel), VDF00102 (juros, seguros)
+#O código abaixo achei em um fórum de R, mas ele dá erro. 
+
+is.numeric(banco_deficiencia$VDF00102)
+
+banco_renda <- banco_deficiência %>% 
+  rowwise() %>% 
+  mutate(sumVar = sum(E01602,E01604,E01802,E01804, na.rm = TRUE))
+
+summary(banco_renda$sumVar)
+
+
+banco_renda <- banco_deficiencia %>% 
+  mutate(renda =  rowsum (E01602,E01604,E01802,E01804)) 
+
+#Filtrar pela idade (C008)
+
+table(banco_renda$C008, banco_renda$VDE001)
+
+filtrado_idade <- banco_renda %>%
+  mutate(C008 = as.numeric(C008))%>%
+  filter(C008 >= 14)
+
+table(filtrado_idade$C008, filtrado_idade$VDE001)
+
+is.numeric(banco_renda$C008)
+
+#Recategorizar a variável de raça (C009), transformar em dummy - branco e não branco
+
+
+#Renomear as variáveis 
+
