@@ -80,7 +80,7 @@ banco_selecionado %>%
 #G014 (deficiência auditiva), G021 (deficiência visual).
 
 
-banco_deficiencia <- banco_selecionado %>%
+banco_deficiência <- banco_selecionado %>%
   mutate(G001 = case_when  (G001 == "1" ~ "dintelectual",
                            G001 == "2" ~ "não")) %>%
   mutate(G006 = case_when(G006 == "1" ~ "dfísica",
@@ -89,49 +89,55 @@ banco_deficiencia <- banco_selecionado %>%
                           G014 == "2" ~ "não")) %>%
   mutate(G021 = case_when(G021 == "1" ~ "dvisual",
                           G021 == "2" ~ "não"))
-as_tibble (banco_deficiencia)
 
 
 #Criar a variável de categorização PCD, categorias: intelectual, auditiva, visual, física 
 #sem deficiência (módulo g)
-#Não consegui encontrar uma função boa para isso. Na internet encontrei a função gather, mas 
-#quando coloco pra pesquisar sobre essa função ele recomenda que se mude para a função
-#pivot_longer(), mas não entendi como usá-la. 
-
+ 
 banco_deficiência <- banco_selecionado %>%
-  mutate(deficiencia = case_when(G001 == "1" ~ "dintelectual", 
+  mutate(deficiência = case_when(G001 == "1" ~ "dintelectual", 
                                  G006 == "1" ~ "dfísica",
                                  G014 == "1" ~"dauditiva", 
                                  G021 == "1" ~ "dvisual",
-                                 G001 == "2" & G006 == "2" & G014 == "2" & G021 == "2" ~ "nenhum"))
+                                 G001 == "2" & G006 == "2" & G014 == "2" & G021 == "2" ~ "nenhuma"))
   
-  mutate(deficiencia = case_when(is.na(deficiencia) ~ "nenhum"))
 
-table(banco_deficiência$deficiencia)
-summary(banco_deficiência$deficiencia)
-sum(is.na(banco_deficiência$deficiencia))
+table(banco_deficiência$deficiência)
+summary(banco_deficiência$deficiência)
 
 #Criar outra variável com três grupos deficientes com limitação, deficientes sem limitação e 
 #não deficientes. As variáveis que indicam limitação: G004, G009, G017, G026. 
 
+banco_deficiência <- banco_deficiência %>%
+  mutate (limitação = case_when (G004 == "1" ~ "não limita", G004 == "2" ~ "um pouco", G004 == "3" ~ "moderadamente", G004 == "4" ~ "intensamente", G004 == "5" ~ "intensamente", 
+                                 G009 == "1" ~ "não limita", G009 == "2" ~ "um pouco", G009 == "3" ~ "moderadamente", G009 == "4" ~ "intensamente", G009 == "5" ~ "intensamente", 
+                                 G017 == "1" ~ "não limita", G017 == "2" ~ "um pouco", G017 == "3" ~ "moderadamente", G017 == "4" ~ "intensamente", G017 == "5" ~ "intensamente",
+                                 G026 == "1" ~ "não limita", G026 == "2" ~ "um pouco", G026 == "3" ~ "moderadamente", G026 == "4" ~ "intensamente", G026 == "5" ~ "intensamente")) 
+
+banco_deficiência %>%
+  count (limitação)
+
+
 #Criar a variável de renda total (dependente): E01602 (salário principal), 
 #E01604 (produtos principal),E01802 (salário secundário), E01804 (produtos secundário).
 
-#Criar a variável de controle de rendimentos domiciliares não provenientes do trabalho: 
-#F00102 (pensão do governo),F00702 (doação), F00802 (aluguel), VDF00102 (juros, seguros)
-#O código abaixo achei em um fórum de R, mas ele dá erro. 
-
-is.numeric(banco_deficiencia$VDF00102)
+is.numeric(banco_deficiência$VDF00102)
 
 banco_renda <- banco_deficiência %>% 
   rowwise() %>% 
-  mutate(sumVar = sum(E01602,E01604,E01802,E01804, na.rm = TRUE))
+  mutate(salário = sum(E01602,E01604,E01802,E01804, na.rm = TRUE))
 
-summary(banco_renda$sumVar)
+summary(banco_renda$salário)
+
+#Criar a variável de controle de rendimentos domiciliares não provenientes do trabalho: 
+#F00102 (pensão do governo),F00702 (doação), F00802 (aluguel), VDF00102 (juros, seguros)
 
 
-banco_renda <- banco_deficiencia %>% 
-  mutate(renda =  rowsum (E01602,E01604,E01802,E01804)) 
+banco_renda <- banco_renda %>%
+  rowwise() %>% 
+  mutate(renda_domiciliar = sum(F00102,F00702,F00802,VDF00102, na.rm = TRUE))
+
+summary(banco_renda$renda_domiciliar)
 
 #Filtrar pela idade (C008)
 
@@ -146,7 +152,16 @@ table(filtrado_idade$C008, filtrado_idade$VDE001)
 is.numeric(banco_renda$C008)
 
 #Recategorizar a variável de raça (C009), transformar em dummy - branco e não branco
+#Branco (1) = 0, não-branco (2, 3, 4, 5 e 9) = 1 (Becker, 2018). 
 
+
+filtrado_idade <- filtrado_idade %>% 
+  mutate(raça = case_when(C009 == "1" ~ "0",
+                          C009 == "2" ~ "1", 
+                          C009 == "3" ~ "1",
+                          C009 == "4" ~ "1",
+                          C009 == "5" ~ "1",
+                          C009 == "9" ~ "1"))
 
 #Renomear as variáveis 
 
