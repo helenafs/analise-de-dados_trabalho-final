@@ -7,7 +7,6 @@ library(downloader)	# downloads and then runs the source() function on scripts f
 
 tf <- tempfile()
 
-
 # download the latest pns microdata
 download.file("ftp://ftp.ibge.gov.br/PNS/2013/Microdados/Dados/PNS_2013.zip" , 
               tf , mode = 'wb' )
@@ -164,15 +163,5 @@ filtrado_idade <- filtrado_idade %>%
                           C009 == "5" ~ "1",
                           C009 == "9" ~ "1"))
 
-#Transformar em .RMD
-
-
-library(magrittr)
-
-readLines('trabalhofinal.R') %>% 
-  stringr::str_replace("# chunkstart", "```{r}") %>% 
-  stringr::str_replace("# chunkend", "```") %>% 
-  writeLines("trabalhofinal.Rmd")
-
-
+#Renomear as variáveis 
 
