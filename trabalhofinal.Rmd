@@ -160,6 +160,16 @@ table(filtrado_idade$C008)
 
 ```
 
+### Renomear e recodificar as variáveis: C006 (sexo), C008 (idade), VDD004 (nível de instrução mais alto), VDE001 (Condição em relação à força de trabalho na semana de referência para pessoas de 14 anos ou mais de idade)
+
+```{r}
+filtrado_idade <- filtrado_idade %>%
+  mutate(sexo = case_when(C006 == "1" ~ "masculino",
+                          C006 == "2" ~ "feminino")) %>%
+  rename(idade = C008)
+
+``` 
+
 ### Recategorizar a variável de raça (C009), transformar em dummy - branco e não branco. Branco (1), não-branco (2, 3, 4, 5 e 9) (Becker, 2018). 
 
 ```{r}
@@ -177,16 +187,6 @@ etnia <- filtrado_idade %>%
 
 
 ```
-
-### Renomear e recodificar as variáveis: C006 (sexo), C008 (idade), VDD004 (nível de instrução mais alto), VDE001 (Condição em relação à força de trabalho na semana de referência para pessoas de 14 anos ou mais de idade)
-
-```{r}
-filtrado_idade <- filtrado_idade %>%
-  mutate(sexo = case_when(C006 == "1" ~ "masculino",
-                          C006 == "2" ~ "feminino")) %>%
-  rename(idade = C008)
-
-``` 
 
 ### Regressão 1, com as variáveis:  
 
