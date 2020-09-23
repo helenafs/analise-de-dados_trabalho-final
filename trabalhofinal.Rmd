@@ -10,9 +10,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
 
 ### Para fazer o dowload dos microdados da PNS, seguir os passos abaixo. 
 
-``` {r}
 # install.packages( c( "SAScii" , "downloader" , "survey" , "ggplot2" ) )
 
+```{r}
 library(survey) 	# load survey package (analyzes complex design surveys)
 library(SAScii) 	# load the SAScii package (imports ascii data with a SAS script)
 library(downloader)	# downloads and then runs the source() function on scripts from github
@@ -22,12 +22,14 @@ tf <- tempfile()
 # download the latest pns microdata
 download.file("ftp://ftp.ibge.gov.br/PNS/2013/Microdados/Dados/PNS_2013.zip" , 
               tf , mode = 'wb' )
+```
 
 # extract all files to the local disk
-setwd ("C:\\Users\\helen\\Documents\\Mestrado\\An?lise de Dados\\Trabalho final\\microdados")
+setwd ("C:\\Users\\helen\\Documents\\Mestrado\\Análise de Dados\\Trabalho final\\microdados")
 
-z <- unzip("pns_2013_microdados_2017_03_23.zip")
+z <- unzip ("pns_2013_microdados_2017_03_23.zip")
 
+```{r}
 # identify household (domicilio) data file
 
 dd <- grep("Dados/DOMPNS", z, value = TRUE)
@@ -44,12 +46,12 @@ ds <- grep("DOMPNS(.*)\\.sas", z, value = TRUE)
 
 ps <- grep("PESPNS(.*)\\.sas", z, value = TRUE)
 
-# create a data.frame object `dom` containing one record per household
-dom <- read.SAScii(dd, ds)
-
 # create a data.frame object `pes` containing one record per person
 
+library(SAScii)
 pessoas <- read.SAScii(pd, ps)
+
+```
 
 # salvar em excel:
 
@@ -58,12 +60,11 @@ pessoas <- read.SAScii(pd, ps)
 
 # write_xlsx(dom, "domicilios.xlsx", use_zip64 = T)
 # write_xlsx(pes, "pessoas.xlsx", use_zip64 = T)
-  
-```
- 
+
 ### Selecionar as colunas de interesse
 
 ```{r}
+
 library(tidyverse)
 
 banco_selecionado <- pessoas %>%
@@ -76,43 +77,18 @@ banco_selecionado <- pessoas %>%
 ```{r}
 banco_selecionado %>%
   count(G001)
-#   G001      n
-#1    1   1596
-#2    2 203950
 
 banco_selecionado %>%
   count(G006)
-#  G006      n
-#1    1   2611
-#2    2 202935
 
 banco_selecionado %>%
   count (G014)
-#  G014      n
-#1    1   3373
-#2    2 202173
 
 banco_selecionado %>%
   count (G021)
-#G021      n
-#1    1   7738
-#2    2 197808
+
 
 ``` 
-
-### Recodificar as variáveis G001 (deficiência intelectual), G006 (deficiência física), G014 (deficiência auditiva), G021 (deficiência visual).
-
-```{r}
-banco_deficiencia <- banco_selecionado %>%
-  mutate(G001 = case_when  (G001 == "1" ~ "dintelectual",
-                           G001 == "2" ~ "não")) %>%
-  mutate(G006 = case_when(G006 == "1" ~ "dfísica",
-                          G006 == "2" ~ "não")) %>%
-  mutate(G014 = case_when(G014 == "1" ~"dauditiva",
-                          G014 == "2" ~ "não")) %>%
-  mutate(G021 = case_when(G021 == "1" ~ "dvisual",
-                          G021 == "2" ~ "não"))
-```
 
 ### Criar a variável de categorização PCD, categorias: intelectual, auditiva, visual, física, sem deficiência (módulo g)
 
@@ -127,21 +103,20 @@ banco_deficiencia <- banco_selecionado %>%
   
 
 table(banco_deficiencia$deficiencia)
-summary(banco_deficiencia$deficiencia)
 
 ```
 
 ### Criar outra variável com quatro grupos: deficientes sem limitação, deficientes com limitação pequena, moderada e intensa. As variáveis que indicam limitação: G004, G009, G017, G026. 
 
 ```{r}
+
 banco_deficiencia <- banco_deficiencia %>%
   mutate (limita = case_when (G004 == "1" ~ "não limita", G004 == "2" ~ "um pouco", G004 == "3" ~ "moderadamente", G004 == "4" ~ "intensamente", G004 == "5" ~ "intensamente", 
                                  G009 == "1" ~ "não limita", G009 == "2" ~ "um pouco", G009 == "3" ~ "moderadamente", G009 == "4" ~ "intensamente", G009 == "5" ~ "intensamente", 
                                  G017 == "1" ~ "não limita", G017 == "2" ~ "um pouco", G017 == "3" ~ "moderadamente", G017 == "4" ~ "intensamente", G017 == "5" ~ "intensamente",
                                  G026 == "1" ~ "não limita", G026 == "2" ~ "um pouco", G026 == "3" ~ "moderadamente", G026 == "4" ~ "intensamente", G026 == "5" ~ "intensamente")) 
 
-banco_deficiencia %>%
-  count (limita)
+table(banco_deficiencia$limita)
 
 ```
 
@@ -149,13 +124,11 @@ banco_deficiencia %>%
 
 ```{r}
 
-is.numeric(banco_deficiencia$VDF00102)
-
 banco_renda <- banco_deficiencia %>% 
   rowwise() %>% 
   mutate(salario = sum(E01602,E01604,E01802,E01804, na.rm = TRUE))
 
-summary(banco_renda$salario)
+summary (banco_renda$salario)
 
 ```
 
@@ -168,7 +141,8 @@ banco_renda <- banco_renda %>%
   rowwise() %>% 
   mutate(renda_domiciliar = sum(F00102,F00702,F00802,VDF00102, na.rm = TRUE))
 
-summary(banco_renda$renda_domiciliar)
+summary (banco_renda$renda_domiciliar)
+
 
 ```
 
@@ -182,23 +156,47 @@ filtrado_idade <- banco_renda %>%
   mutate(C008 = as.numeric(C008))%>%
   filter(C008 >= 14)
 
-table(filtrado_idade$C008, filtrado_idade$VDE001)
-
-is.numeric(banco_renda$C008)
+table(filtrado_idade$C008)
 
 ```
 
-### Recategorizar a variável de raça (C009), transformar em dummy - branco e não branco. Branco (1) = 0, não-branco (2, 3, 4, 5 e 9) = 1 (Becker, 2018). 
+### Recategorizar a variável de raça (C009), transformar em dummy - branco e não branco. Branco (1), não-branco (2, 3, 4, 5 e 9) (Becker, 2018). 
 
 ```{r}
-filtrado_idade <- filtrado_idade %>% 
-  mutate(C009 = case_when(C009 == "1" ~ "0",
-                          C009 == "2" ~ "1", 
-                          C009 == "3" ~ "1",
-                          C009 == "4" ~ "1",
-                          C009 == "5" ~ "1",
-                          C009 == "9" ~ "1"))
+
+table(filtrado_idade$C009)
+
+etnia <- filtrado_idade %>% 
+  mutate(etnia = case_when(C009 == 1 ~ "branco",
+                          C009 == 2 ~ "não branco", 
+                          C009 == 3 ~ "não branco",
+                          C009 == 4 ~ "não branco",
+                          C009 == 5 ~ "não branco",
+                          C009 == 9 ~ "não branco"))
+
+
+
 ```
 
+### Renomear e recodificar as variáveis: C006 (sexo), C008 (idade), VDD004 (nível de instrução mais alto), VDE001 (Condição em relação à força de trabalho na semana de referência para pessoas de 14 anos ou mais de idade)
 
+```{r}
+filtrado_idade <- filtrado_idade %>%
+  mutate(sexo = case_when(C006 == "1" ~ "masculino",
+                          C006 == "2" ~ "feminino")) %>%
+  rename(idade = C008)
+
+``` 
+
+### Regressão 1, com as variáveis:  
+
+```{r}
+
+regressao1 <- lm (salario ~ deficiencia + sexo + idade, data = filtrado_idade)
+summary(regressao1)
+
+is.numeric(filtrado_idade$VDE001)
+
+
+```
 
