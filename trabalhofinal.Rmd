@@ -22,14 +22,12 @@ tf <- tempfile()
 # download the latest pns microdata
 download.file("ftp://ftp.ibge.gov.br/PNS/2013/Microdados/Dados/PNS_2013.zip" , 
               tf , mode = 'wb' )
-```
 
 # extract all files to the local disk
 setwd ("C:\\Users\\helen\\Documents\\Mestrado\\Análise de Dados\\Trabalho final\\microdados")
 
 z <- unzip ("pns_2013_microdados_2017_03_23.zip")
 
-```{r}
 # identify household (domicilio) data file
 
 dd <- grep("Dados/DOMPNS", z, value = TRUE)
@@ -146,7 +144,7 @@ summary (banco_renda$renda_domiciliar)
 
 ```
 
-#Filtrar pela idade (C008)
+#Filtrar pela idade (C008) e renomear a variável  
 
 ```{r} 
 
@@ -154,20 +152,30 @@ table(banco_renda$C008, banco_renda$VDE001)
 
 filtrado_idade <- banco_renda %>%
   mutate(C008 = as.numeric(C008))%>%
-  filter(C008 >= 14)
+  filter(C008 >= 14) %>%
+  rename(idade = C008)
 
-table(filtrado_idade$C008)
+table(filtrado_idade$idade)
 
 ```
 
-### Renomear e recodificar as variáveis: C006 (sexo), C008 (idade), VDD004 (nível de instrução mais alto), VDE001 (Condição em relação à força de trabalho na semana de referência para pessoas de 14 anos ou mais de idade)
+### Renomear e recodificar as variáveis: C006 (sexo), VDE001 (Condição em relação à força de trabalho na semana de referência para pessoas de 14 anos ou mais de idade), VDD004 (nível de instrução mais alto)
 
 ```{r}
+
 filtrado_idade <- filtrado_idade %>%
   mutate(sexo = case_when(C006 == "1" ~ "masculino",
                           C006 == "2" ~ "feminino")) %>%
-  rename(idade = C008)
-
+  mutate (trabalho = case_when(VDE001 == "1" ~ "sim",
+                               VDE001 == "2" ~ "não")) %>%
+  mutate (escolaridade = case_when(VDD004 == "1" ~ "sem_instrução",
+                                   VDD004 == "2" ~ "fund_incompleto",
+                                   VDD004 == "3" ~ "fund_completo",
+                                   VDD004 == "4" ~ "médio_incompleto",
+                                   VDD004 == "5" ~ "médio_completo",
+                                   VDD004 == "6" ~ "sup_incompleto",
+                                   VDD004 == "7" ~ "sup_completo"))
+  
 ``` 
 
 ### Recategorizar a variável de raça (C009), transformar em dummy - branco e não branco. Branco (1), não-branco (2, 3, 4, 5 e 9) (Becker, 2018). 
@@ -176,27 +184,194 @@ filtrado_idade <- filtrado_idade %>%
 
 table(filtrado_idade$C009)
 
-etnia <- filtrado_idade %>% 
-  mutate(etnia = case_when(C009 == 1 ~ "branco",
-                          C009 == 2 ~ "não branco", 
-                          C009 == 3 ~ "não branco",
-                          C009 == 4 ~ "não branco",
-                          C009 == 5 ~ "não branco",
-                          C009 == 9 ~ "não branco"))
+filtrado_idade <- filtrado_idade %>% 
+  mutate(cor = case_when( C009 == "1" ~ "branco",
+                          C009 == "2" ~ "não_branco", 
+                          C009 == "3" ~ "não_branco",
+                          C009 == "4" ~ "não_branco",
+                          C009 == "5" ~ "não_branco",
+                          C009 == "9" ~ "não_branco" )) %>%
+  mutate(cor = as.factor(cor))
 
-
+levels(filtrado_idade$cor)
+table(filtrado_idade$cor)
 
 ```
 
-### Regressão 1, com as variáveis:  
+### Criar a categoria de região a partir da variável (V0001) de Estados. 
 
 ```{r}
 
-regressao1 <- lm (salario ~ deficiencia + sexo + idade, data = filtrado_idade)
+filtrado_idade <- filtrado_idade %>% 
+  mutate(regiao = case_when(V0001 >= 11 & V0001 < 18 ~ "Norte",
+                            V0001 >= 21 & V0001 < 30 ~ "Nordeste",
+                            V0001 >= 31 & V0001 < 36 ~ "Sudeste",
+                            V0001 >= 41 & V0001 < 44 ~ "Sul",
+                            V0001 >= 50 & V0001 < 54 ~ "Centro-oeste")) %>%
+  mutate(regiao = as.factor(regiao))
+
+levels(filtrado_idade$regiao)
+
+``` 
+
+### Mudar as categorias de referência da variável deficiência e escolaridade 
+
+```{r}
+
+filtrado_idade$deficiencia <- fct_relevel(filtrado_idade$deficiencia, 
+                                  "nenhuma")
+
+filtrado_idade$escolaridade <- fct_relevel(filtrado_idade$escolaridade, 
+                                  "sem_instrução")
+
+
+``` 
+
+### Regressão 1, com a variável de deficiencia como dependente.   
+
+```{r}
+
+regressao1 <- lm (salario ~ deficiencia + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao, data = filtrado_idade)
 summary(regressao1)
-
-is.numeric(filtrado_idade$VDE001)
-
+confint(regressao1)
 
 ```
 
+### Verificar os pressupostos da regressão 1
+
+### Linearidade 
+
+```{r}
+plot(regressao1, 1)
+
+```
+
+### Homocedasticidade
+
+```{r}
+
+plot(regressao1, 3)
+
+library(lmtest)
+
+bptest(regressao1)
+
+library(car)
+
+ncvTest(regressao1) 
+
+```
+
+### Autocorrelação entre casos/resíduos
+
+```{r}
+
+acf(regressao1$residuals)
+durbinWatsonTest(regressao1)
+
+```
+
+### Normalidade dos Resíduos
+
+```{r}
+
+plot(regressao1, 2)
+
+```
+
+###Multicolinearidade
+
+```{r}
+
+library (car)
+vif (regressao1)
+
+```
+
+### Outlier/Observação influente
+
+```{r}
+
+plot (regressao1, 4)
+
+plot (regressao1, 5)
+
+sem_outlier <- filtrado_idade %>%
+  slice (-c(111104, 111090, 137068))
+
+```
+
+
+### Regressão 2, com a variável de limitação como dependente
+
+```{r}
+regressao2 <- lm (salario ~ limita + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao, data = filtrado_idade)
+summary(regressao2)
+confint(regressao2)
+
+``` 
+
+### Linearidade 
+
+```{r}
+plot(regressao2, 1)
+
+```
+
+### Homocedasticidade
+
+```{r}
+
+plot(regressao2, 3)
+
+library(lmtest)
+
+bptest(regressao2)
+
+library(car)
+
+ncvTest(regressao2) 
+
+```
+
+### Autocorrelação entre casos/resíduos
+
+```{r}
+
+acf(regressao2$residuals)
+durbinWatsonTest(regressao2)
+
+```
+
+### Normalidade dos Resíduos
+
+```{r}
+
+plot(regressao2, 2)
+
+```
+
+###Multicolinearidade
+
+```{r}
+
+library (car)
+vif (regressao2)
+
+```
+
+### Outlier/Observação influente
+
+```{r}
+
+plot (regressao2, 4)
+
+plot (regressao2, 5)
+
+sem_outlier2 <- filtrado_idade %>%
+  slice (-c(101225,123432,148567))
+
+regressao3 <- lm (salario ~ limita + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao, data = sem_outlier2)
+summary(regressao3)
+
+```
