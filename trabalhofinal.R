@@ -1,6 +1,5 @@
 # install.packages( c( "SAScii" , "downloader" , "survey" , "ggplot2" ) )
 
-
 library(survey) 	# load survey package (analyzes complex design surveys)
 library(SAScii) 	# load the SAScii package (imports ascii data with a SAS script)
 library(downloader)	# downloads and then runs the source() function on scripts from github
@@ -50,33 +49,6 @@ glimpse (pessoas)
 
 banco_selecionado <- pessoas %>%
   select (V0001, C001:G032, M001:N023, W00101:VDDATAM)
-
-#Contar quantas pessoas em cada categoria de deficiência G001 (deficiência intelectual), 
-#G006 (deficiência física),G014 (deficiência auditiva), G021 (deficiência visual)
-
-banco_selecionado %>%
-  count(G001)
-#   G001      n
-#1    1   1596
-#2    2 203950
-
-banco_selecionado %>%
-  count(G006)
-#  G006      n
-#1    1   2611
-#2    2 202935
-
-banco_selecionado %>%
-  count (G014)
-#  G014      n
-#1    1   3373
-#2    2 202173
-
-banco_selecionado %>%
-  count (G021)
-#G021      n
-#1    1   7738
-#2    2 197808
 
 #Criar a variável de categorização PCD, categorias: intelectual, auditiva, visual, física 
 #sem deficiência (módulo g)
@@ -152,8 +124,6 @@ filtrado_idade <- filtrado_idade %>%
 
 ### Recategorizar a variável de cor (C009), transformar em dummy - branco e não branco. Branco (1), não-branco (2, 3, 4, 5 e 9) (Becker, 2018). 
 
-table(filtrado_idade$C009)
-
 filtrado_idade <- filtrado_idade %>% 
   mutate(cor = case_when( C009 == "1" ~ "branco",
                           C009 == "2" ~ "não_branco", 
@@ -164,8 +134,6 @@ filtrado_idade <- filtrado_idade %>%
   mutate(cor = as.factor(cor))
 
 levels(filtrado_idade$cor)
-table(filtrado_idade$cor)
-
 
 ### Criar a categoria de região a partir da variável (V0001) de Estados. 
 
@@ -179,140 +147,15 @@ filtrado_idade <- filtrado_idade %>%
 
 levels(filtrado_idade$regiao)
 
-### Variável de ocupação (VDE)
+### Variável de percepção de estado de saúde 
 
-### Mudar as categorias de referência da variável deficiência e escolaridade 
-
-filtrado_idade$deficiencia <- fct_relevel(filtrado_idade$deficiencia, 
-                                          "nenhuma")
-
-filtrado_idade$escolaridade <- fct_relevel(filtrado_idade$escolaridade, 
-                                           "sem_instrução")
-
-
-### Regressão 1, com a variável de deficiencia como dependente.
-### Fazer interação entre cor e sexo 
-
-regressao1 <- lm (salario ~ deficiencia + idade + sexo + trabalho + escolaridade + 
-                    renda_domiciliar + cor + regiao, data = filtrado_idade)
-summary(regressao1)
-confint(regressao1)
-
-### Verificar os pressupostos da regressão 1
-
-### Linearidade 
-
-plot(regressao1, 1)
-
-### Homocedasticidade
-
-plot(regressao1, 3)
-
-library(lmtest)
-
-bptest(regressao1)
-
-library(car)
-
-ncvTest(regressao1) 
-
-### Autocorrelação entre casos/resíduos
-
-acf(regressao1$residuals)
-durbinWatsonTest(regressao1)
-
-### Normalidade dos Resíduos
-
-plot(regressao1, 2)
-
-###Multicolinearidade
-
-library (car)
-vif (regressao1)
-
-### Outlier/Observação influente
-
-plot (regressao1, 4)
-
-plot (regressao1, 5)
-
-sem_outlier <- filtrado_idade %>%
-  slice (-c(111104, 111090, 137068))
-
-regressao2 <- lm (salario ~ deficiencia + idade + sexo + trabalho + escolaridade + 
-                    renda_domiciliar + cor + regiao, data = sem_outlier)
-summary(regressao2)
-confint(regressao2)
-
-### Regressão 3, com a variável de limitação como dependente
-
-regressao3 <- lm (salario ~ limita + idade + sexo + trabalho + 
-                  escolaridade + renda_domiciliar + cor + regiao, 
-                  data = filtrado_idade)
-
-summary(regressao3)
-confint(regressao3)
-
-### Linearidade 
-
-plot(regressao3, 1)
-
-### Homocedasticidade
-
-plot(regressao3, 3)
-
-library(lmtest)
-
-bptest(regressao2)
-
-library(car)
-
-ncvTest(regressao2) 
-
-
-### Autocorrelação entre casos/resíduos
-
-
-
-acf(regressao3$residuals)
-durbinWatsonTest(regressao3)
-
-
-
-### Normalidade dos Resíduos
-
-
-
-plot(regressao3, 2)
-
-
-
-###Multicolinearidade
-
-library (car)
-vif (regressao3)
-
-
-### Outlier/Observação influente
-
-plot (regressao3, 4)
-
-plot (regressao3, 5)
-
-sem_outlier2 <- filtrado_idade %>%
-  slice (-c(101225,123432,148567))
-
-regressao4 <- lm (salario ~ limita + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao, data = sem_outlier2)
-summary(regressao4)
-confint(regressao4)
-
-#Transformar em .RMD
-
-library(magrittr)
-
-readLines('trabalhofinal.R') %>% 
-  stringr::str_replace("# chunkstart", "```{r}") %>% 
-  stringr::str_replace("# chunkend", "```") %>% 
-  writeLines("trabalhofinal.Rmd")
-
+filtrado_idade <- filtrado_idade %>% 
+  mutate(estadosaude = case_when(N001 == "1" ~ "muito boa",
+                                 N001 == "2" ~ "boa",
+                                 N001 == "3" ~ "regular",
+                                 N001 == "4" ~ "ruim",
+                                 N001 == "5" ~ "muito ruim"))%>% 
+  mutate(estadosaude = as.factor(estadosaude))
+  
+levels (filtrado_idade$estadosaude)
 
