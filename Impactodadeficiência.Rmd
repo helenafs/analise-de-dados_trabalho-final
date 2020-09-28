@@ -23,8 +23,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### 3. 1 Dados
 
-Os dados utilizados são da PNS/IBGE ^[Para mais informações ver: <https://www.ibge.gov.br/estatisticas/sociais/saude/9160-pesquisa-nacional-de-saude.html?=&t=o-que-e>] de 2013 ^[Período de coleta - 27/07/2013; Semana - 21/07/2013 a 27/07/2013; Mês - 01/07/2013 a 31/07/2013; Mês - 28/06/2013 a 27/07/2013.]. 
-
 ### 3.2 Variáveis de interesse
 
 ### 3.3 Variáveis de controle
