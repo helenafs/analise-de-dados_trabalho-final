@@ -241,8 +241,7 @@ filtrado_idade$escolaridade <- fct_relevel(filtrado_idade$escolaridade,
                                            "sem_instrução")
 
 
-# Regressão 1, com a variável de deficiencia como dependente.
-# Fazer interação entre cor e sexo 
+# Regressão 1.
 
 regressao1 <- lm ()
 summary(regressao1)
@@ -297,7 +296,7 @@ regressao2 <- lm ()
 summary(regressao2)
 confint(regressao2)
 
-# Regressão 3, com a variável de limitação como dependente
+# Regressão 3
 
 regressao3 <- lm ()
 
@@ -353,9 +352,9 @@ regressao4 <- lm ()
 summary(regressao4)
 confint(regressao4)
 
-# Regressão com interação entre sexo e deficiência 
+# Regressão 5 
 
-regressao5 <- lm (salario ~ deficiencia * sexo  )
+regressao5 <- lm ()
 
 ``` 
 
