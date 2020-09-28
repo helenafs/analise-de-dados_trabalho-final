@@ -1,0 +1,364 @@
+---
+title: "O impacto da deficiência na renda"
+author: "Helena Santos"
+date: "25/09/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Abstract: 
+**Keywords:** 
+
+### Resumo: 
+**Palavras-chave:** 
+
+## 1 Introdução 
+
+## 2 Problematização
+
+## 3 Métodos
+
+### 3. 1 Dados
+
+Os dados utilizados são da PNS/IBGE ^[Para mais informações ver: <https://www.ibge.gov.br/estatisticas/sociais/saude/9160-pesquisa-nacional-de-saude.html?=&t=o-que-e>] de 2013 ^[Período de coleta - 27/07/2013; Semana - 21/07/2013 a 27/07/2013; Mês - 01/07/2013 a 31/07/2013; Mês - 28/06/2013 a 27/07/2013.]. 
+
+### 3.2 Variáveis de interesse
+
+### 3.3 Variáveis de controle
+
+### 3.4 Modelo
+
+## 4 Resultados
+
+## 5 Conclusão 
+
+## Referências
+
+
+## Anexo 
+
+### Dicionário de variáveis da PNS 
+
+Utilizadas: 
+Unidade da federação: V0001
+Módulo C: características gerais dos moradores - C001 até C012
+Módulo D: características de educação das pessoas de 5 anos ou mais de idade - D001 até D015
+Módulo E: trabalho dos moradores do domicílio - E001 até E027
+Módulo F: rendimentos domiciliares F001 até VDF00102
+Módulo G: pessoas com deficiências - G001 até G032
+Módulo M: informações para futuros contatos, características de trabalho e apoio social - M001 até M019
+Módulo N: percepção do estado de saúde - N001 até N023
+Módulo W – informações laboratoriais - W00101 até W00408
+Variáveis de amostragem: V0028 até V00293
+Variáveis derivadas do morador: VDD004 (Nível de instrução mais elevado alcançado (pessoas de 5 anos ou mais de idade)); VDE001 (Condição em relação à força de trabalho na semana de referência para pessoas de 14 anos ou mais de idade); VDE002 (Condição de ocupação na semana de referência para pessoas de 14 anos ou mais de idade); VDDATAM (Data de geração do arquivo de microdados. Data ordenada na forma: ano (4 algarismos), mês (2) e dia (2) -  AAAAMMDD)
+
+Retiradas
+V0024: Estrato
+UPA_PNS: UPA
+V0006_PN: Número de ordem do domicílio na PNS
+UPA: Código da UPA das Pesquisas Domiciliares do Sistema Integrado
+V0025: Seleção do morador de 18 anos ou mais para responder o questionário individual
+Módulo I:  cobertura de plano de saúde - I001 até I011
+Módulo J: utilização de serviços de saúde - J001 até J060
+Módulo K:  idosos - K001 até K062 
+Módulo L: crianças com menos de 2 anos - L00201 até L020 
+Módulo O:  acidentes e violências - O001 até O048 
+Módulo P:  estilos de vida - P001 até P072 
+Módulo Q:  doenças crônicas - Q001 até Q137 
+Módulo R: saúde da mulher (mulheres de 18 anos e mais de idade) - R001 até R04903 
+Módulo S: atendimento pré-natal - S001 até S058 
+Módulo U: saúde bucal - U001 até U025 
+Módulo X: atendimento médico - X001 até X02510 
+
+### Código 
+
+Download e manipulação do banco 
+```{r}
+# # install.packages( c( "SAScii" , "downloader" , "survey" , "ggplot2" ) )
+# 
+# library(survey) 	# load survey package (analyzes complex design surveys)
+# library(SAScii) 	# load the SAScii package (imports ascii data with a SAS script)
+# library(downloader)	# downloads and then runs the source() function on scripts from github
+# 
+# tf <- tempfile()
+# 
+# 
+# # download the latest pns microdata
+# download.file("ftp://ftp.ibge.gov.br/PNS/2013/Microdados/Dados/PNS_2013.zip" , 
+#               tf , mode = 'wb' )
+# 
+# # extract all files to the local disk
+# setwd ("C:\\Users\\helen\\Documents\\Mestrado\\Análise de Dados\\Trabalho final\\codigoR")
+# 
+# z <- unzip("pns_2013_microdados_2017_03_23.zip")
+# 
+# # identify household (domicilio) data file
+# dd <- grep("Dados/DOMPNS", z, value = TRUE)
+# 
+# # identify person data file
+# pd <- grep("Dados/PESPNS", z, value = TRUE)
+# 
+# # identify household (domicilio) sas import script
+# ds <- grep("DOMPNS(.*)\\.sas", z, value = TRUE)
+# 
+# # identify person sas import script
+# ps <- grep("PESPNS(.*)\\.sas", z, value = TRUE)
+# 
+# # create a data.frame object `dom` containing one record per household
+# dom <- read.SAScii(dd, ds)
+# 
+# # create a data.frame object `pes` containing one record per person
+# pessoas <- read.SAScii(pd, ps)
+# 
+# 
+# # Salvar em excel
+# #install.packages("writexl")
+# #library(writexl)
+# 
+# #write_xlsx(dom, "domicilios.xlsx", use_zip64 = T)
+# #write_xlsx(pes, "pessoas.xlsx", use_zip64 = T)
+# 
+# #Selecionar as colunas de interesse
+# 
+# library(tidyverse)
+# glimpse (pessoas)
+# 
+# banco_selecionado <- pessoas %>%
+#   select (V0001, C001:G032, M001:N023, W00101:VDDATAM)
+# 
+# #Criar a variável de categorização PCD, categorias: intelectual, auditiva, visual, física 
+# #sem deficiência (módulo g)
+#  
+# banco_deficiencia <- banco_selecionado %>%
+#   mutate(deficiencia = case_when(G001 == "1" ~ "dintelectual", 
+#                                  G006 == "1" ~ "dfísica",
+#                                  G014 == "1" ~"dauditiva", 
+#                                  G021 == "1" ~ "dvisual",
+#                                  G001 == "2" & G006 == "2" & G014 == "2" & G021 == "2" ~ "nenhuma"))
+# 
+# 
+# table(banco_deficiencia$deficiencia)
+# 
+# #Criar outra variável com três grupos deficientes com limitação, deficientes sem limitação e 
+# #não deficientes. As variáveis que indicam limitação: G004, G009, G017, G026. 
+# 
+# banco_deficiencia <- banco_deficiencia %>%
+#   mutate (limita = case_when (G004 == "1" ~ "não limita", G004 == "2" ~ "um pouco", G004 == "3" ~ "moderadamente", G004 == "4" ~ "intensamente", G004 == "5" ~ "intensamente", 
+#                               G009 == "1" ~ "não limita", G009 == "2" ~ "um pouco", G009 == "3" ~ "moderadamente", G009 == "4" ~ "intensamente", G009 == "5" ~ "intensamente", 
+#                               G017 == "1" ~ "não limita", G017 == "2" ~ "um pouco", G017 == "3" ~ "moderadamente", G017 == "4" ~ "intensamente", G017 == "5" ~ "intensamente",
+#                               G026 == "1" ~ "não limita", G026 == "2" ~ "um pouco", G026 == "3" ~ "moderadamente", G026 == "4" ~ "intensamente", G026 == "5" ~ "intensamente")) 
+# 
+# table(banco_deficiencia$limita)
+# 
+# 
+# #Criar a variável de renda total (dependente): E01602 (salário principal), 
+# #E01604 (produtos principal),E01802 (salário secundário), E01804 (produtos secundários).
+# 
+# banco_renda <- banco_deficiencia %>% 
+#   rowwise() %>% 
+#   mutate(salario = sum(E01602,E01604,E01802,E01804, na.rm = TRUE))
+# 
+# summary (banco_renda$salario)
+# 
+# Criar a variável de controle de rendimentos domiciliares não provenientes do trabalho: 
+# F00102 (pensão do governo),F00702 (doação), F00802 (aluguel), VDF00102 (juros, seguros)
+
+# banco_renda <- banco_renda %>%
+#   rowwise() %>% 
+#   mutate(renda_domiciliar = sum(F00102,F00702,F00802,VDF00102, na.rm = TRUE))
+
+setwd("C:\\Users\\helen\\Documents\\Mestrado\\Análise de Dados\\Trabalho final\\codigoR")
+
+load ("C:\\Users\\helen\\Documents\\Mestrado\\Análise de Dados\\Trabalho final\\codigoR\\sessao.RData")
+
+# Filtrar pela idade (C008) e renomear a variável 
+
+library(tidyverse)
+
+filtrado_idade <- banco_renda %>%
+  mutate(C008 = as.numeric(C008))%>%
+  filter(C008 >= 14) %>%
+  rename(idade = C008)
+
+# Renomear e recodificar as variáveis: C006 (sexo), VDE001 (Condição em relação à força de trabalho na semana de referência para pessoas de 14 anos ou mais de idade), VDD004 (nível de instrução mais alto)
+
+
+filtrado_idade <- filtrado_idade %>%
+  mutate(sexo = case_when(C006 == "1" ~ "masculino",
+                          C006 == "2" ~ "feminino")) %>%
+  mutate (trabalho = case_when(VDE001 == "1" ~ "sim",
+                               VDE001 == "2" ~ "não")) %>%
+  mutate (escolaridade = case_when(VDD004 == "1" ~ "sem_instrução",
+                                   VDD004 == "2" ~ "fund_incompleto",
+                                   VDD004 == "3" ~ "fund_completo",
+                                   VDD004 == "4" ~ "médio_incompleto",
+                                   VDD004 == "5" ~ "médio_completo",
+                                   VDD004 == "6" ~ "sup_incompleto",
+                                   VDD004 == "7" ~ "sup_completo"))
+
+
+# Recategorizar a variável de cor (C009), transformar em dummy - branco e não branco. Branco (1), não-branco (2, 3, 4, 5 e 9) (Becker, 2018). 
+
+filtrado_idade <- filtrado_idade %>% 
+  mutate(cor = case_when( C009 == "1" ~ "branco",
+                          C009 == "2" ~ "não_branco", 
+                          C009 == "3" ~ "não_branco",
+                          C009 == "4" ~ "não_branco",
+                          C009 == "5" ~ "não_branco",
+                          C009 == "9" ~ "não_branco" )) %>%
+  mutate(cor = as.factor(cor))
+
+# Criar a categoria de região a partir da variável (V0001) de Estados e modificar a variável NOO1 
+
+filtrado_idade <- filtrado_idade %>% 
+  mutate(regiao = case_when(V0001 >= 11 & V0001 < 18 ~ "Norte",
+                            V0001 >= 21 & V0001 < 30 ~ "Nordeste",
+                            V0001 >= 31 & V0001 < 36 ~ "Sudeste",
+                            V0001 >= 41 & V0001 < 44 ~ "Sul",
+                            V0001 >= 50 & V0001 < 54 ~ "Centro-oeste"))%>%
+  mutate(regiao = as.factor(regiao))%>% 
+  mutate(estadosaude = case_when(N001 == "1" ~ "muito boa",
+                                 N001 == "2" ~ "boa",
+                                 N001 == "3" ~ "regular",
+                                 N001 == "4" ~ "ruim",
+                                 N001 == "5" ~ "muito ruim"))%>% 
+  mutate(estadosaude = as.factor(estadosaude))
+
+```
+
+Parte operacional 
+
+```{r}
+# Mudar as categorias de referência da variável deficiência e escolaridade 
+
+filtrado_idade$deficiencia <- fct_relevel(filtrado_idade$deficiencia, 
+                                          "nenhuma")
+
+filtrado_idade$escolaridade <- fct_relevel(filtrado_idade$escolaridade, 
+                                           "sem_instrução")
+
+
+# Regressão 1, com a variável de deficiencia como dependente.
+# Fazer interação entre cor e sexo 
+
+regressao1 <- lm ()
+summary(regressao1)
+confint(regressao1)
+
+library(dotwhisker)
+
+dwplot(regressao1)
+
+# Verificar os pressupostos da regressão 1
+
+# Linearidade 
+
+plot(regressao1, 1)
+
+# Homocedasticidade
+
+plot(regressao1, 3)
+
+library(lmtest)
+
+bptest(regressao1)
+
+library(car)
+
+ncvTest(regressao1) 
+
+# Autocorrelação entre casos/resíduos
+
+acf(regressao1$residuals)
+durbinWatsonTest(regressao1)
+
+# Normalidade dos Resíduos
+
+plot(regressao1, 2)
+
+# Multicolinearidade
+
+library (car)
+vif (regressao1)
+
+# Outlier/Observação influente
+
+plot (regressao1, 4)
+
+plot (regressao1, 5)
+
+sem_outlier <- filtrado_idade %>%
+  slice (-c())
+
+regressao2 <- lm ()
+summary(regressao2)
+confint(regressao2)
+
+# Regressão 3, com a variável de limitação como dependente
+
+regressao3 <- lm ()
+
+summary(regressao3)
+confint(regressao3)
+
+# Linearidade 
+
+plot(regressao3, 1)
+
+# Homocedasticidade
+
+plot(regressao3, 3)
+
+library(lmtest)
+
+bptest(regressao2)
+
+library(car)
+
+ncvTest(regressao2) 
+
+
+# Autocorrelação entre casos/resíduos
+
+
+acf(regressao3$residuals)
+durbinWatsonTest(regressao3)
+
+
+# Normalidade dos Resíduos
+
+
+plot(regressao3, 2)
+
+
+# Multicolinearidade
+
+library (car)
+vif (regressao3)
+
+
+# Outlier/Observação influente
+
+plot (regressao3, 4)
+
+plot (regressao3, 5)
+
+sem_outlier2 <- filtrado_idade %>%
+  slice (-c())
+
+regressao4 <- lm ()
+summary(regressao4)
+confint(regressao4)
+
+# Regressão com interação entre sexo e deficiência 
+
+regressao5 <- lm (salario ~ deficiencia * sexo  )
+
+``` 
+
+
+
+
