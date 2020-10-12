@@ -29,9 +29,160 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### 3.4 Modelo
 
-## 4 Resultados
+## 4 Estatísticas Descritivas 
 
-## 5 Conclusão 
+```{r}
+library(tidyverse)
+
+table(filtrado_idade$deficiencia)
+
+#nenhuma 
+(148207/160902)*100
+#auditiva 
+(2969/160902)*100
+#fisica 
+(2227/160902)*100
+#intelectual 
+(1253/160902)*100
+#visual 
+(6246/160902)*100
+
+library(scales)
+
+ggplot(filtrado_idade, aes(deficiencia, ..count../sum(..count..) )) +
+  geom_bar(na.rm = T) +
+  scale_y_continuous(labels = percent)+
+  labs(title = "Figura 2",
+subtitle = "Gráfico de Barras",
+x = "Tipos de deficiência",
+y = "Porcentagem",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+theme_classic () 
+
+``` 
+
+```{r}
+
+table(filtrado_idade$limita)
+
+
+#não limita     
+(4395/160902)*100
+#um pouco 
+(3135/160902)*100
+#moderadamente    
+(2196/160902)*100
+#intensamente 
+(2969/160902)*100
+
+ggplot(filtrado_idade, aes(limita, ..count../sum(..count..))) +
+  geom_bar(na.rm = T) +
+  scale_y_continuous(labels = percent)+
+  labs(title = "Figura 3",
+subtitle = "Gráfico de Barras",
+x = "Limitação decorrente da deficiência",
+y = "Porcentagem",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic () 
+
+
+```
+
+```{r}
+
+summary(filtrado_idade$salario)
+
+ggplot(filtrado_idade, aes("",salario)) +
+  geom_boxplot()+
+  labs(title = "Figura 4",
+subtitle = "Gráfico de Box-Plot",
+x = "",
+y = "Rendimento bruto mensal",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic () 
+
+```
+
+```{r}
+
+banco_descritivo <- filtrado_idade %>%
+  group_by (deficiencia) %>%
+   summarise (media = mean(salario, na.rm = TRUE), 
+              mediana = median(salario, na.rm = TRUE), 
+              minimo = min(salario, na.rm = TRUE),
+              maximo = max(salario, na.rm = TRUE),
+              desvio = sd(salario, na.rm = TRUE),
+              .groups = 'drop')           
+   
+
+ggplot(filtrado_idade, aes(deficiencia, salario)) +
+geom_boxplot ()+
+  labs(title = "Figura 5",
+subtitle = "Gráfico de Box-Plot",
+x = "Tipos de deficiência",
+y = "Rendimento bruto mensal",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic () 
+
+```
+
+## 5 Resultados
+
+```{r}
+library(dotwhisker)
+
+dwplot (list (regressao1, regressao2), vline = geom_vline(xintercept = 0, linetype = "dashed"), by_2sd = T) +
+  labs(title = "Figura 6",
+subtitle = "Gráfico Intervalos de Confiança",
+x = "",
+y = "",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic () 
+
+```
+
+```{r}
+
+dwplot (list (regressao3, regressao4), vline = geom_vline(xintercept = 0, linetype = "dashed"), by_2sd = T) +
+  labs(title = "Figura 7",
+subtitle = "Gráfico Intervalos de Confiança",
+x = "",
+y = "",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic ()
+
+```
+
+
+```{r}
+dwplot (list (regressao5, regressao6), vline = geom_vline(xintercept = 0, linetype = "dashed"), by_2sd = T) +
+  labs(title = "Figura 8",
+subtitle = "Gráfico Intervalos de Confiança",
+x = "",
+y = "",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)")+
+  theme_classic ()
+
+```
+
+
+```{r}
+library(sjPlot)
+
+plot_model(regressao5, type = "pred", 
+           terms = c("deficiencia", "sexo"), 
+           ci.lvl = 0.9)+
+labs(title = "Figura 9",
+subtitle = "Gráfico Variáveis de Interação",
+x = "Tipos de deficiência",
+y = "Rendimento bruto mensal",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic () 
+
+
+``` 
+
+## 6 Conclusão 
 
 ## Referências
 
@@ -140,18 +291,6 @@ Download e manipulação do banco
 # 
 # table(banco_deficiencia$deficiencia)
 # 
-# #Criar outra variável com três grupos deficientes com limitação, deficientes sem limitação e 
-# #não deficientes. As variáveis que indicam limitação: G004, G009, G017, G026. 
-# 
-# banco_deficiencia <- banco_deficiencia %>%
-#   mutate (limita = case_when (G004 == "1" ~ "não limita", G004 == "2" ~ "um pouco", G004 == "3" ~ "moderadamente", G004 == "4" ~ "intensamente", G004 == "5" ~ "intensamente", 
-#                               G009 == "1" ~ "não limita", G009 == "2" ~ "um pouco", G009 == "3" ~ "moderadamente", G009 == "4" ~ "intensamente", G009 == "5" ~ "intensamente", 
-#                               G017 == "1" ~ "não limita", G017 == "2" ~ "um pouco", G017 == "3" ~ "moderadamente", G017 == "4" ~ "intensamente", G017 == "5" ~ "intensamente",
-#                               G026 == "1" ~ "não limita", G026 == "2" ~ "um pouco", G026 == "3" ~ "moderadamente", G026 == "4" ~ "intensamente", G026 == "5" ~ "intensamente")) 
-# 
-# table(banco_deficiencia$limita)
-# 
-# 
 # #Criar a variável de renda total (dependente): E01602 (salário principal), 
 # #E01604 (produtos principal),E01802 (salário secundário), E01804 (produtos secundários).
 # 
@@ -225,89 +364,75 @@ filtrado_idade <- filtrado_idade %>%
                                  N001 == "5" ~ "muito ruim"))%>% 
   mutate(estadosaude = as.factor(estadosaude))
 
-```
+# Criar outra variável com quatro tipos de limitação: não limita, um pouco, moderadamente e intensamente. As variáveis que indicam limitação: G004, G009, G017, G026. 
 
-Parte operacional 
+ filtrado_idade <- filtrado_idade %>%
+  mutate (limita = case_when (G004 == "1" ~ "não limita", G004 == "2" ~ "um pouco", G004 == "3" ~ "moderadamente", G004 == "4" ~ "intensamente", G004 == "5" ~ "intensamente", 
+                               G009 == "1" ~ "não limita", G009 == "2" ~ "um pouco", G009 == "3" ~ "moderadamente", G009 == "4" ~ "intensamente", G009 == "5" ~ "intensamente", 
+                              G017 == "1" ~ "não limita", G017 == "2" ~ "um pouco", G017 == "3" ~ "moderadamente", G017 == "4" ~ "intensamente", G017 == "5" ~ "intensamente",
+                             G026 == "1" ~ "não limita", G026 == "2" ~ "um pouco", G026 == "3" ~ "moderadamente", G026 == "4" ~ "intensamente", G026 == "5" ~ "intensamente")) 
+ 
+  filtrado_idade <- filtrado_idade %>%
+    mutate(deficiencia = as.factor(deficiencia))%>%
+    mutate(limita = as.factor(limita))
 
-```{r}
 # Mudar as categorias de referência da variável deficiência e escolaridade 
 
 filtrado_idade$deficiencia <- fct_relevel(filtrado_idade$deficiencia, 
                                           "nenhuma")
 
+filtrado_idade$sexo <- fct_relevel(filtrado_idade$sexo,
+                                   "masculino")
+
+filtrado_idade$trabalho <- fct_relevel(filtrado_idade$trabalho,
+                                       "sim")
+
+
 filtrado_idade$escolaridade <- fct_relevel(filtrado_idade$escolaridade, 
                                            "sem_instrução")
 
+filtrado_idade$cor <- fct_relevel (filtrado_idade$cor,
+                                   "branco")
 
-# Regressão 1.
+filtrado_idade$regiao <- fct_relevel(filtrado_idade$regiao,
+                                     "Nordeste")
 
-regressao1 <- lm ()
+filtrado_idade$estadosaude <- fct_relevel(filtrado_idade$estadosaude, 
+                                          "muito boa")
+
+
+# Colocar o resultado das regressões em tabela
+
+```
+
+### Pressupostos da regressão H1
+
+```{r}
+# Regressão 1, com a variável de deficiencia como dependente.
+# Fazer interação entre cor e sexo 
+
+regressao1 <- lm (salario ~ deficiencia + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao, data = filtrado_idade)
+
 summary(regressao1)
 confint(regressao1)
 
-library(dotwhisker)
-
-dwplot(regressao1)
-
-# Verificar os pressupostos da regressão 1
-
-# Linearidade 
-
-plot(regressao1, 1)
-
-# Homocedasticidade
-
-plot(regressao1, 3)
-
-library(lmtest)
-
-bptest(regressao1)
-
-library(car)
-
-ncvTest(regressao1) 
-
-# Autocorrelação entre casos/resíduos
-
-acf(regressao1$residuals)
-durbinWatsonTest(regressao1)
-
-# Normalidade dos Resíduos
-
-plot(regressao1, 2)
-
-# Multicolinearidade
-
-library (car)
-vif (regressao1)
-
-# Outlier/Observação influente
+# Outlier/Observação influente = 137068 (influente), 111090 e 111104 (outliers) 
 
 plot (regressao1, 4)
 
 plot (regressao1, 5)
 
-sem_outlier <- filtrado_idade %>%
-  slice (-c())
+outlierTest(regressao1)
 
-regressao2 <- lm ()
+# Retirar as observações influentes de acordo com o plot 5
+
+regressao2 <- lm (salario ~ deficiencia + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao, data = filtrado_idade [-c(111104, 137068, 111090),])
 summary(regressao2)
 confint(regressao2)
 
-# Regressão 3
+# Homocedasticidade (Pressupostos sobre o componente estocástico da população) - o teste demonstra heterocedasticidade - Para resolver a heterocedasticidade: o resultado do p-valor do teste abaixo (coeftest) é mais confiável, ele ajusta os p-valores de acordo com os erros de cada observação. 
 
-regressao3 <- lm ()
-
-summary(regressao3)
-confint(regressao3)
-
-# Linearidade 
-
-plot(regressao3, 1)
-
-# Homocedasticidade
-
-plot(regressao3, 3)
+plot(regressao2, 3)
 
 library(lmtest)
 
@@ -317,45 +442,150 @@ library(car)
 
 ncvTest(regressao2) 
 
+library(sandwich)
 
-# Autocorrelação entre casos/resíduos
+coeftest(regressao2, 
+         vcov = vcovHC(regressao2, type = "HC3"))
 
+# Linearidade (pressuposto sobre a especificação do modelo) - OK 
 
-acf(regressao3$residuals)
-durbinWatsonTest(regressao3)
+plot(regressao2, 1)
 
+# Autocorrelação entre casos/resíduos (Pressupostos sobre o componente estocástico da população) - melhorou da regressão 1 para a 2, porém o teste demonstra que existe autocorrelação  
 
-# Normalidade dos Resíduos
+acf(regressao2$residuals)
+durbinWatsonTest(regressao2)
 
+# Normalidade dos Resíduos - não normal 
 
-plot(regressao3, 2)
+plot(regressao2, 2)
 
-
-# Multicolinearidade
+# Multicolinearidade (pressuposto sobre o componente estocástico da população) - O VIF não chega nem perto de 4, mas não existe um valor objetivo para definir o quão grave é a multicolinearidade, o 4 é apenas um parâmetro. A solução da multicolinearidade é aumentar o N, no caso dos dados isso não é possível. 
 
 library (car)
-vif (regressao3)
+vif (regressao2)
 
+``` 
 
-# Outlier/Observação influente
+### Pressupostos da regressão que testa a H2
+
+```{r}
+# Regressão 3, com a variável de limitação como dependente
+
+regressao3 <- lm (salario ~ limita + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao + estadosaude, 
+                  data = filtrado_idade)
+
+summary(regressao3)
+confint(regressao3)
+
+# Outlier/Observação influente = 101225 (outlier), 135443 e 148567 (influentes)
 
 plot (regressao3, 4)
 
 plot (regressao3, 5)
 
-sem_outlier2 <- filtrado_idade %>%
-  slice (-c())
+outlierTest(regressao3)
 
-regressao4 <- lm ()
+# Retirar as observações influentes de acordo com o plot 5
+
+regressao4 <- lm (salario ~ limita + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao + estadosaude, data = filtrado_idade [-c(101225, 135443, 148567), ] )
 summary(regressao4)
 confint(regressao4)
 
-# Regressão 5 
+# Homocedasticidade - (Pressupostos sobre o componente estocástico da população) - o teste demonstra heterocedasticidade - Para resolver a heterocedasticidade: o resultado do p-valor do teste abaixo (coeftest) é mais confiável, ele ajusta os p-valores de acordo com os erros de cada observação.
 
-regressao5 <- lm ()
+plot(regressao4, 3)
+
+bptest(regressao4)
+
+ncvTest(regressao4) 
+
+coeftest(regressao4, 
+         vcov = vcovHC(regressao4, type = "HC3"))
+
+# Linearidade (pressuposto sobre a especificação do modelo) - OK
+
+plot(regressao4, 1)
+
+
+# Autocorrelação entre casos/resíduos Pressupostos sobre o componente estocástico da população) - nem a regressão 3 e nem a 4 têm autocorrelação
+
+
+acf(regressao4$residuals)
+durbinWatsonTest(regressao4)
+
+
+# Normalidade dos Resíduos - não normal
+
+
+plot(regressao4, 2)
+
+
+# Multicolinearidade (pressuposto sobre o componente estocástico da população) - O VIF não chega nem perto de 4, mas não existe um valor objetivo para definir o quão grave é a multicolinearidade, o 4 é apenas um parâmetro. A solução da multicolinearidade é aumentar o N, no caso dos dados isso não é possível. 
+
+vif (regressao4)
+
+```
+
+### Pressupostos da regressão que testa a H3
+
+```{r}
+
+# Regressão 5 com interação entre sexo e deficiência 
+
+regressao5 <- lm (salario ~ deficiencia + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao + deficiencia * sexo, data = filtrado_idade)
+summary(regressao5)
+confint(regressao5)
+
+# Outlier/Observação influente = 111104 e 111090 (outliers), 137068 (influente)
+
+plot (regressao5, 4)
+
+plot (regressao5, 5)
+
+
+outlierTest(regressao5)
+
+# Retirar as observações influentes de acordo com o plot 5
+
+regressao6 <- lm (salario ~ deficiencia + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao + deficiencia * sexo, data = filtrado_idade [-c(111104, 137068, 111090), ])
+summary(regressao6)
+confint(regressao6)
+
+# Homocedasticidade (Pressupostos sobre o componente estocástico da população) - o teste demonstra heterocedasticidade - Para resolver a heterocedasticidade: o resultado do p-valor do teste abaixo (coeftest) é mais confiável, ele ajusta os p-valores de acordo com os erros de cada observação.
+
+plot(regressao6, 3)
+
+bptest(regressao6)
+
+ncvTest(regressao6) 
+
+coeftest(regressao6, 
+         vcov = vcovHC(regressao6, type = "HC3"))
+
+# Linearidade (pressuposto sobre a especificação do modelo) - OK
+
+plot(regressao6, 1)
+
+
+# Autocorrelação entre casos/resíduos (Pressupostos sobre o componente estocástico da população) - melhorou da regressão 5 para a 6, porém o teste demonstra que existe autocorrelação  
+
+
+acf(regressao6$residuals)
+durbinWatsonTest(regressao6)
+
+
+# Normalidade dos Resíduos - não normal
+
+
+plot(regressao6, 2)
+
+
+# Multicolinearidade (pressuposto sobre o componente estocástico da população) -  Não existe um valor objetivo para definir o quão grave é a multicolinearidade, o 4 é apenas um parâmetro. A solução da multicolinearidade é aumentar o N, no caso dos dados isso não é possível. Nessa regressão a deficiência apresenta alta multicolinearide devido à interação. 
+
+library (car)
+vif (regressao6)
+
+
 
 ``` 
-
-
-
-
