@@ -1,241 +1,42 @@
 ---
 title: "O impacto da deficiência na renda"
 author: "Helena Santos"
-date: "14/10/2020"
 output: html_document
+
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F)
+
 ```
 
-### Abstract: 
-**Keywords:** 
-
-### Resumo: 
-**Palavras-chave:** 
-
-## 1 Introdução 
-
-## 2 Problematização
-
-## 3 Métodos
-
-### 3. 1 Dados
-
-### 3.2 Variáveis de interesse
-
-### 3.3 Variáveis de controle
-
-### 3.4 Modelo
-
-## 4 Estatísticas Descritivas 
-
 ```{r}
+
+# Código 
+
+# Pacotes
+
 library(tidyverse)
-
-table(filtrado_idade$deficiencia)
-
-#nenhuma 
-(148207/160902)*100
-#auditiva 
-(2969/160902)*100
-#fisica 
-(2227/160902)*100
-#intelectual 
-(1253/160902)*100
-#visual 
-(6246/160902)*100
-
 library(scales)
-
-ggplot(filtrado_idade, aes(deficiencia, ..count../sum(..count..) )) +
-  geom_bar(na.rm = T) +
-  scale_y_continuous(labels = percent)+
-  labs(title = "Figura 2",
-subtitle = "Gráfico de Barras",
-x = "Tipos de deficiência",
-y = "Porcentagem",
-caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
-theme_classic () 
-
-``` 
-
-```{r}
-
-table(filtrado_idade$limita)
-
-
-#não limita     
-(4395/160902)*100
-#um pouco 
-(3135/160902)*100
-#moderadamente    
-(2196/160902)*100
-#intensamente 
-(2969/160902)*100
-
-ggplot(filtrado_idade, aes(limita, ..count../sum(..count..))) +
-  geom_bar(na.rm = T) +
-  scale_y_continuous(labels = percent)+
-  labs(title = "Figura 3",
-subtitle = "Gráfico de Barras",
-x = "Limitação decorrente da deficiência",
-y = "Porcentagem",
-caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
-  theme_classic () 
-
-
-```
-
-```{r}
-
-summary(filtrado_idade$salario)
-
-ggplot(filtrado_idade, aes("",salario)) +
-  geom_boxplot()+
-  labs(title = "Figura 4",
-subtitle = "Gráfico de Box-Plot",
-x = "",
-y = "Rendimento bruto mensal",
-caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
-  theme_classic () 
-
-```
-
-```{r}
-
-banco_descritivo <- filtrado_idade %>%
-  group_by (deficiencia) %>%
-   summarise (media = mean(salario, na.rm = TRUE), 
-              mediana = median(salario, na.rm = TRUE), 
-              minimo = min(salario, na.rm = TRUE),
-              maximo = max(salario, na.rm = TRUE),
-              desvio = sd(salario, na.rm = TRUE),
-              .groups = 'drop')           
-   
-
-ggplot(filtrado_idade, aes(deficiencia, salario)) +
-geom_boxplot ()+
-  labs(title = "Figura 5",
-subtitle = "Gráfico de Box-Plot",
-x = "Tipos de deficiência",
-y = "Rendimento bruto mensal",
-caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
-  theme_classic () 
-
-```
-
-## 5 Resultados
-
-```{r}
 library(dotwhisker)
-
-dwplot (list (regressao1, regressao2), vline = geom_vline(xintercept = 0, linetype = "dashed"), by_2sd = T) +
-  labs(title = "Figura 6",
-subtitle = "Gráfico Intervalos de Confiança",
-x = "",
-y = "",
-caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
-  theme_classic () 
-
-```
-
-```{r}
-
-dwplot (list (regressao3, regressao4), vline = geom_vline(xintercept = 0, linetype = "dashed"), by_2sd = T) +
-  labs(title = "Figura 7",
-subtitle = "Gráfico Intervalos de Confiança",
-x = "",
-y = "",
-caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
-  theme_classic ()
-
-```
-
-
-```{r}
-dwplot (list (regressao5, regressao6), vline = geom_vline(xintercept = 0, linetype = "dashed"), by_2sd = T) +
-  labs(title = "Figura 8",
-subtitle = "Gráfico Intervalos de Confiança",
-x = "",
-y = "",
-caption = "Elaboração própria a partir da PNS (IBGE/2013)")+
-  theme_classic ()
-
-```
-
-
-```{r}
 library(sjPlot)
+library(lmtest)
+library(car)
+library(sandwich)
+library(stargazer)
 
-plot_model(regressao5, type = "pred", 
-           terms = c("deficiencia", "sexo"), 
-           ci.lvl = 0.9)+
-labs(title = "Figura 9",
-subtitle = "Gráfico Variáveis de Interação",
-x = "Tipos de deficiência",
-y = "Rendimento bruto mensal",
-caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
-  theme_classic () 
+# Download e manipulação do banco 
 
+# install.packages( c( "SAScii" , "downloader" , "survey" , "ggplot2" ) )
 
-``` 
-
-## 6 Conclusão 
-
-## Referências
-
-
-## Anexo 
-
-### Dicionário de variáveis da PNS 
-
-Utilizadas: 
-Unidade da federação: V0001
-Módulo C: características gerais dos moradores - C001 até C012
-Módulo D: características de educação das pessoas de 5 anos ou mais de idade - D001 até D015
-Módulo E: trabalho dos moradores do domicílio - E001 até E027
-Módulo F: rendimentos domiciliares F001 até VDF00102
-Módulo G: pessoas com deficiências - G001 até G032
-Módulo M: informações para futuros contatos, características de trabalho e apoio social - M001 até M019
-Módulo N: percepção do estado de saúde - N001 até N023
-Módulo W – informações laboratoriais - W00101 até W00408
-Variáveis de amostragem: V0028 até V00293
-Variáveis derivadas do morador: VDD004 (Nível de instrução mais elevado alcançado (pessoas de 5 anos ou mais de idade)); VDE001 (Condição em relação à força de trabalho na semana de referência para pessoas de 14 anos ou mais de idade); VDE002 (Condição de ocupação na semana de referência para pessoas de 14 anos ou mais de idade); VDDATAM (Data de geração do arquivo de microdados. Data ordenada na forma: ano (4 algarismos), mês (2) e dia (2) -  AAAAMMDD)
-
-Retiradas
-V0024: Estrato
-UPA_PNS: UPA
-V0006_PN: Número de ordem do domicílio na PNS
-UPA: Código da UPA das Pesquisas Domiciliares do Sistema Integrado
-V0025: Seleção do morador de 18 anos ou mais para responder o questionário individual
-Módulo I:  cobertura de plano de saúde - I001 até I011
-Módulo J: utilização de serviços de saúde - J001 até J060
-Módulo K:  idosos - K001 até K062 
-Módulo L: crianças com menos de 2 anos - L00201 até L020 
-Módulo O:  acidentes e violências - O001 até O048 
-Módulo P:  estilos de vida - P001 até P072 
-Módulo Q:  doenças crônicas - Q001 até Q137 
-Módulo R: saúde da mulher (mulheres de 18 anos e mais de idade) - R001 até R04903 
-Módulo S: atendimento pré-natal - S001 até S058 
-Módulo U: saúde bucal - U001 até U025 
-Módulo X: atendimento médico - X001 até X02510 
-
-### Código 
-
-Download e manipulação do banco 
-```{r}
-# # install.packages( c( "SAScii" , "downloader" , "survey" , "ggplot2" ) )
-# 
 # library(survey) 	# load survey package (analyzes complex design surveys)
 # library(SAScii) 	# load the SAScii package (imports ascii data with a SAS script)
 # library(downloader)	# downloads and then runs the source() function on scripts from github
-# 
+ 
 # tf <- tempfile()
-# 
-# 
-# # download the latest pns microdata
+ 
+ 
+# download the latest pns microdata
 # download.file("ftp://ftp.ibge.gov.br/PNS/2013/Microdados/Dados/PNS_2013.zip" , 
 #               tf , mode = 'wb' )
 # 
@@ -312,8 +113,6 @@ setwd("C:\\Users\\helen\\Documents\\Mestrado\\Análise de Dados\\Trabalho final\
 load ("C:\\Users\\helen\\Documents\\Mestrado\\Análise de Dados\\Trabalho final\\codigoR\\sessao.RData")
 
 # Filtrar pela idade (C008) e renomear a variável 
-
-library(tidyverse)
 
 filtrado_idade <- banco_renda %>%
   mutate(C008 = as.numeric(C008))%>%
@@ -400,21 +199,252 @@ filtrado_idade$regiao <- fct_relevel(filtrado_idade$regiao,
 filtrado_idade$estadosaude <- fct_relevel(filtrado_idade$estadosaude, 
                                           "muito boa")
 
+```
 
-# Colocar o resultado das regressões em tabela
+### Abstract 
+Does disability impact people's income? Do all types of disabilities impact or not? The main purpose of this article is to answer these questions. For this, data from the National Health Survey (PNS), IBGE / 2013, and the approach of the linear least-squares regression model (OLS) will be used. With this work I hope to contribute to the literature in question.
+
+**Keywords:** disability, People with Disabilities, economy of people with disabilities, income, wage, work.
+
+### Resumo 
+A deficiência impacta na renda das pessoas? Todos os tipos de deficiência impactam ou não? O principal objetivo deste artigo é responder essas perguntas. Para isso, serão utilizados os dados da Pesquisa Nacional de Saúde (PNS) do IBGE/2013 e a abordagem do modelo de regressão linear de mínimos quadrados ordinários (MQO). Com esse trabalho espero contribuir para a literatura em questão.
+
+**Palavras-chave:** deficiência, Pessoas com Deficiência, economia das pessoas com deficiência, renda, salário, trabalho.
+
+
+## 1 Introdução 
+
+Segundo o Relatório da Organização Mundial de Saúde (OMS) sobre a Deficiência, publicado em 2011, cerca de 15% da população mundial estaria vivendo com algum tipo de deficiência na época. De acordo com a Pesquisa Nacional de Saúde (PNS), realizada em 2013 pelo Instituto Brasileiro de Geografia e Estatística (IBGE), 0,8% da população brasileira vivia com deficiência intelectual, 1,3% da população declarou possuir deficiência física, 1,1% deficiência auditiva e 3,6% deficiência visual (BRASIL, 2015).
+
+As questões que envolvem a deficiência são diversas e complexas, o segmento, que agrega pessoas com deficiência intelectual, visual, auditiva e física, está sujeito a violações de sua dignidade, perda de autonomia e tratamento desigual (WHO, 2011; BRASIL, 2015). 
+
+Em 1945 a Organização Mundial do Trabalho (OIT) estabeleceu que deveriam ser garantidos o emprego e indenizações para os mutilados de guerra (BECKER, 2019). O primeiro tratado que abordou os direitos das pessoas com deficiência (PCD) ao acesso ao mercado de trabalho foi promulgado em 1983 pela Convenção de Reabilitação Profissional e Emprego da OIT (CASTRO; MOREIRA; SILVA, 2017). 
+
+No entanto, a humanidade ainda está muito aquém no processo de remover todas as barreiras que impedem a participação econômica de pessoas com deficiência. O relatório da OMS (2011) indicou que pessoas com deficiência recebem, em média, menores salários, e as taxas de emprego para essas pessoas são menores em 53% para homens e em 20% mulheres, em comparação às pessoas sem deficiência. Os baixos salários e as baixas taxas de emprego são causados muitas vezes pela discriminação do empregador, não pelos efeitos limitantes da deficiência dos trabalhadores (BALDWIN, 1993; BECKER, 2019). Em 2019, o  Poder Executivo enviou à Câmara dos Deputados o Projeto de Lei 6.159/2019 que flexibiliza a Lei de Cotas de trabalho para pessoas com deficiência (Lei 8213, de 1991), o projeto foi classificado pelas entidades defensoras dos direitos da PCD como uma tentativa de retrocesso no âmbito do trabalho. De acordo com o PL:  
+
+> “[...] a definição de cotas de forma ampla alcançando igualmente todos os setores, todas as localidades e todas as ocupações representa uma obrigação que, em muitos casos, não pode ser cumprida.”. (BRASIL, 2019)
+
+Muitos estudos apontam evidências de que a deficiência reduz o salário e a probabilidade de o indivíduo conseguir emprego independentemente do país, da fonte de dados ou do período de análise. Entre os efeitos causados pela deficiência na questão do trabalho estão: redução da produtividade no trabalho, discriminação no emprego, restrição do acesso à educação e à formação profissional. Fatores, que causam impacto na subsequente capacidade de inserção no mercado de trabalho (BECKER, 2019). 
+
+Diante disso, a presente pesquisa, focando especificamente no caso brasileiro, busca identificar se a deficiência (física, auditiva, intelectual e visual) afeta a renda das PCDs. Para tal serão utilizados os dados da PNS desenvolvida em uma parceria entre a Secretaria de Vigilância em Saúde do Ministério da Saúde (SVS/MS), a Fundação Oswaldo Cruz (Fiocruz) e o IBGE em 2013. 
+
+Esse estudo é relevante, em primeiro lugar, porque contribui para um pequeno conjunto de evidências empíricas que relacionam a existência da deficiência e o impacto na renda dessas pessoas. Em segundo lugar, ao fazer a análise diferenciando o tipo de deficiência (auditiva, física, intelectual e visual)^[A deficiência intelectual pode estar associada a síndromes ou transtornos de desenvolvimento como a síndrome de Down, autismo, paralisia cerebral, acidente vascular cerebral, derrame, aneurisma, epilepsia ou demência senil. A deficiência física refere-se a alteração completa ou parcial de um ou mais segmentos do corpo, que podem ser decorrentes da amputação ou ausência do segmento, paralisia permanente, deformidade congênita, ostomia, nanismo, deficiência motora decorrente da poliomielite ou paralisia infantil. A deficiência auditiva refere-se a audição reduzida ou surdez de um ou ambos os ouvidos, e a deficiência visual refere-se a baixa visão ou cegueira de um ou de ambos os olhos (BECKER, 2019).], o estudo favorece o direcionamento de políticas públicas e relaciona a renda com cada tipo de deficiência. Nos estudos recentes a renda foi relacionada com indivíduos que possuíam deficiência com e sem limitação e com pessoas sem deficiência, não levando em conta a diferenciação do impacto do tipo de deficiência na renda. Além disso contribuo com a disponibilização dos dados da PNS já formatados para serem utilizados no R^[O R e seus respectivos pacotes podem ser instalados gratuitamente a partir de https://cran.r-project.org/bin/windows/base/], uma linguagem de programação gratuita, aberta dinâmica, voltada à manipulação, análise e visualização de dados. 
+
+Esse trabalho está estruturado da seguinte maneira: a segunda seção, problematização, fornece mais informações acerca do tema em questão e da teoria que embasa a questão de pesquisa; a terceira seção informa a metodologia empregada na pesquisa; a quarta seção fornece as estatísticas descritivas dos dados; a quinta seção discute os resultados e a última sessão, a conclusão. 
+
+## 2 Problematização
+
+Diversas modelos já foram propostos para definir a deficiência, nesse artigo a deficiência é entendida de acordo com o Relatório Mundial da OMS sobre a Deficiência (2011), que reconhece a deficiência como um conceito em evolução, mas define que ela não deve ser vista somente pela ótica médica, nem como algo puramente social e adota como conceito um modelo “biológico-psíquico-social” que compreende funcionalidade e deficiência como uma interação dinâmica entre problemas de saúde e fatores contextuais, tanto pessoais quanto ambientais. 
+
+Em 1991 o Brasil adotou a Lei de Contratação da Pessoa com Deficiência nas Empresas (Lei nº 8.213 / 1991). Segundo tal lei, as empresas com 100 ou mais funcionários devem preencher de 2 a 5 por cento de seus cargos com PCDs. Porém o problema da discriminação no trabalho contra deficientes foi tratado apenas em 2015 com o Estatuto da Pessoa com Deficiência (EPD - Lei nº 13.416/2015). O EPD garante que: 
+
+>“A pessoa com deficiência tem direito ao trabalho de sua livre escolha e aceitação, em ambiente acessível e inclusivo, em igualdade de oportunidades com as demais pessoas. § 2º A pessoa com deficiência tem direito, em igualdade de oportunidades com as demais pessoas, a condições justas e favoráveis de trabalho, incluindo igual remuneração por trabalho de igual valor.”. (BRASIL, 2015, Art. 34) 
+
+Porém, já foi comprovado que existe diferença de remuneração entre deficientes e não deficientes com e sem limitações das atividades. As políticas de inclusão das PCDs no mercado de trabalho parecem contemplar, principalmente, aqueles que não possuem limitações às atividades, o empregador consegue cumprir as determinações da política de cotas de contratação sem que sejam necessários ajustes significativos na infraestrutura da empresa. Além disso, o Programa de Benefício de Prestação Continuada (BPC)^[Direito garantido pela Constituição Federal de 1988, regulamentado pela Lei Orgânica da Assistência Social (LOAS), Lei nº 8.742/93 e pelas Leis nº:12.435/2011,  nº 12.470/2011 e nº 13.146/2015, que alteram dispositivos da LOAS; e pelos Decretos nº 6.214/2007, nº 6.564/2008 e nº 7.617/2011, assegura 1 (um) salário mínimo mensal ao idoso, com idade de 65 anos ou mais, e à pessoa com deficiência, de qualquer idade, com impedimentos de longo prazo, de natureza física, mental, intelectual ou sensorial, que comprove não possuir meios de garantir o próprio sustento, nem tê-lo provido por sua família. Em ambos os casos, é necessário que a renda mensal bruta familiar per capita seja inferior a ¼ (um quarto) do salário mínimo vigente.] que direciona a renda incondicionalmente para pessoas com deficiência, assume que a deficiência dificulta o emprego remunerado. Aproximadamente 10% das PCDs que têm limitações das atividades recebem alguma pensão do governo. No caso dos deficientes que não possuem limitações, essa proporção é 7% e dos não deficientes é 4% (CASTRO; MOREIRA; SILVA, 2017; BECKER, 2019 ). 
+
+Além da questão trabalhista existe o aspecto educacional. A média de anos de escolaridade é inferior para as pessoas com deficiência em comparação com as pessoas sem deficiência (homens: 5,96 e 7,03 anos, mulheres: 4,98 e 6,26 anos, respectivamente).  A deficiência pode restringir a acumulação de capital humano e, portanto, levar a oportunidades de emprego limitadas e ganhos reduzidos na idade adulta para PCDs desde o nascimento ou durante a infância (MITRA; POSARAC; VICK, 2011; BECKER, 2019). No EPD existe um capítulo dedicado à educação, assim como existe o capítulo dedicado ao trabalho, já citado anteriormente. De acordo com o artigo 27 da lei: 
+
+>“A educação constitui direito da pessoa com deficiência, assegurados sistema educacional inclusivo em todos os níveis e aprendizado ao longo de toda a vida, de forma a alcançar o máximo desenvolvimento possível de seus talentos e habilidades físicas, sensoriais, intelectuais e sociais, segundo suas características, interesses e necessidades de aprendizagem. É dever do Estado, da família, da comunidade escolar e da sociedade assegurar educação de qualidade à pessoa com deficiência, colocando-a a salvo de toda forma de violência, negligência e discriminação.”. (BRASIL, 2015, Art. 27)
+
+No entanto, os desafios da educação voltada às pessoas com deficiência no Brasil não se limitam ao acesso, os alunos não estão, necessariamente, recebendo uma educação apropriada, seja por falta de profissionais qualificados ou mesmo pela falta generalizada de recursos. As matrículas de alunos com deficiência concentram-se nas primeiras séries do ensino fundamental, com ampla defasagem idade/série (BECKER, 2019). 
+
+Do total de brasileiros em idade ativa com uma deficiência, apenas 41,4% são economicamente ativos, enquanto esse número é de 63,6% para os membros da sociedade sem deficiência. As explicações para essa discrepância de participação no mercado de trabalho surgem de vários fatores. A menor taxa de escolaridade para PCDs é apenas um deles. A falta de instalações e infraestrutura necessárias pode tornar mais oneroso para as pessoas com deficiência atenderem às demandas de emprego, além do baixo salário de mercado oferecido às pessoas com deficiência como consequência de um menor nível de produtividade e/ou discriminação por parte do empregador. A escassez de ambientes acessíveis para PCDs limita o acesso a diversos bens e serviços, especialmente serviços de transporte, colocando-os em significativa desvantagem (CASTRO; MOREIRA; SILVA, 2017; BECKER, 2019 ). 
+
+Uma revisão abrangente da literatura concluiu que a saúde precária reduz a capacidade de trabalhar e tem efeitos substantivos sobre os salários, a participação da força de trabalho e a escolha do emprego. As condições de saúde podem aumentar o risco de pobreza por meio da perda de rendimentos e despesas com saúde (MITRA; POSARAC; VICK, 2011). De acordo com a OMS (2011), as PCDs em países de baixa renda são 50% mais propensas a ter despesas extraordinárias com saúde em relação às pessoas sem deficiência. Como resultado, as famílias de PCDs são mais propensas a serem pobres do que as famílias de pessoas sem deficiência com renda bruta similar (BECKER, 2019). 
+
+Em resumo, a deficiência pode levar a um padrão de vida mais baixo e à pobreza, por meio de um impacto adverso na educação, no emprego, nos rendimentos e no aumento dos gastos relacionados à deficiência. Os impactos da deficiência na pobreza também estão relacionados aos problemas de saúde e seus determinantes. Na maioria das definições de deficiência ter um problema de saúde é um pré-requisito para ter uma deficiência. Pode-se então supor que uma parte significativa da associação entre deficiência e pobreza é mediada pela saúde (MITRA; POSARAC; VICK, 2011).
+
+Devido às ligações entre pobreza e deficiência descritas anteriormente, espera-se que a existência de deficiência cause um impacto na renda. Neste estudo a hipótese principal é que se o indivíduo tem deficiência existirá um impacto negativo na renda proveniente do salário. A Figura 1 é um diagrama esquemático da relação entre a teoria e a hipótese em questão no presente trabalho, ou seja, exemplifica melhor a conexão entre a deficiência e a renda. 
+
+![Figura 1](C:/Users/helen/Documents/Mestrado/Análise de Dados/Trabalho final/codigoR/Figura1.png)
+
+Kellstedt e Whitten (2018) apontam 4 obstáculos que devem ser superados para definir uma relação causal entre uma variável X e Y, no caso deste estudo X é a deficiência e Y a renda. O primeiro obstáculo é fornecer uma argumentação razoável para X causar Y, o que já  foi feito nos parágrafos anteriores. O segundo obstáculo é descartar a chance de Y causar X, a causalidade reversa. Deficiência e pobreza são fenômenos complexos, dinâmicos e intrinsecamente ligados. O início da deficiência pode aumentar o risco de renda baixa e a renda baixa pode aumentar o risco de deficiência, pois a renda baixa como um fator contextual, também pode aumentar a probabilidade de uma condição de saúde resultar em deficiência, limitação de atividades ou restrição de participação (MITRA; POSARAC; VICK, 2011). Para controlar esse efeito reverso apenas a renda do indivíduo que é proveniente do salário é levada em conta, sendo assim, observo o impacto da existência da deficiência na renda que o indivíduo consegue por si próprio e não a ocorrência da deficiência em um indivíduo que já vivia em uma situação de baixa renda. O terceiro obstáculo é provar a existência de covariação entre X e Y, a literatura exposta nos parágrafos anteriores comprova a existência da covariação entre renda e deficiência. O quarto e último obstáculo é levar em consideração outras variáveis Z. O banco de dados da PNS (2013) permite que outras variáveis sejam levadas em conta na equação, como: trabalho, escolaridade, sexo, cor, região geográfica, idade, etc. 
+
+Na próxima seção as variáveis serão melhor especificadas com a devida justificativa para sua inclusão no modelo. 
+
+## 3 Métodos
+
+O propósito do estudo é estimar o efeito das deficiências sobre a renda proveniente do salário para pessoas de 14 anos ou mais com base nas informações da PNS (2013). Para este propósito, utilizo o R, versão 4.0.2, um software de programação gratuito, aberto, voltada à manipulação, análise e visualização de dados. O R contém pacotes gratuitos disponíveis na internet que possibilitam a produção de análises quantitativas de forma fácil e com excelente apresentação, sendo, assim, uma poderosa ferramenta para análise de dados (FIGUEIREDO FILHO et al, 2011). Para fins de facilidade da análise também será utilizado o RStudio, versão 1.2.5033^[O R Studio pode ser instalado gratuitamente a partir de https://rstudio.com/products/rstudio/download/]. 
+
+### 3. 1 Dados
+ 
+Os dados utilizados são da PNS/IBGE^[Para mais informações ver: <https://www.ibge.gov.br/estatisticas/sociais/saude/9160-pesquisa-nacional-de-saude.html?=&t=o-que-e>] de 2013^[Período de coleta - 27/07/2013; Semana - 21/07/2013 a 27/07/2013; Mês - 01/07/2013 a 31/07/2013; Mês - 28/06/2013 a 27/07/2013.]. Pesquisa que teve como objetivos: produzir dados em âmbito nacional, sobre a situação de saúde e os estilos de vida da população brasileira e dados sobre a atenção à saúde, no que se refere ao acesso e uso dos serviços de saúde, às ações preventivas, à continuidade dos cuidados e ao financiamento da assistência de saúde (SOUZA JÚNIOR et al, 2015).  
+
+A pesquisa utiliza uma amostra probabilística de domicílios, composta pela população residentes em domicílios particulares permanentes e improvisados, nas áreas urbana e rural. Foi definido como abrangência geográfica todo o Território Nacional, dividido nos setores censitários da Base Operacional Geográfica de 2010, excluídas as áreas com características especiais e com pouca população, que são classificadas pelo IBGE, na base de setores, como aldeias indígenas, quartéis, bases militares, alojamentos, acampamentos, embarcações, penitenciárias, colônias penais, presídios, cadeias, asilos, orfanatos, conventos e hospitais. Também foram excluídos os setores censitários localizados em Terras Indígenas (BRASIL, 2015; SOUZA JÚNIOR et al, 2015). 
+
+O questionário da PNS tem três partes: (1) domiciliar, com questões sobre informações do domicílio e visitas domiciliares realizadas pela equipe de Saúde da Família e agentes de endemias; (2) moradores do domicílio, com questões relativas às características gerais de todos os moradores do domicílio, incluindo nível de educação, trabalho, rendimento, deficiências, cobertura de plano de saúde, utilização dos serviços de saúde, saúde do idoso, cobertura de mamografia e características de crianças menores de 2 anos de idade; e (3) individual, com questões dirigidas a um morador adulto (18 anos ou mais de idade), selecionado aleatoriamente, sobre outras características de trabalho e apoio social, percepção do estado de saúde, acidentes e violências, estilos de vida, doenças crônicas, saúde da mulher, atendimento pré-natal, saúde bucal e atendimento médico. No momento da coleta os entrevistadores foram orientados a não aceitar como informante uma pessoa menor de 14 anos de idade (BRASIL, 2015; SOUZA JÚNIOR et al, 2015).  No IBGE os entrevistadores passam por treinamentos antes das coletas das pesquisas garantindo a confiabilidade e a validade das variáveis. 
+
+A partir do questionário o IBGE produziu dois bancos com os microdados da pesquisa. O banco selecionado no presente trabalho é o banco “pessoas”, que contém 205.546 observações. 
+
+### 3.2 Variáveis de interesse
+
+Na PNS a deficiência é medida de acordo com a auto-atribuição do respondente^[No módulo G do questionário foram feitas quatro perguntas que se referiam à existência da deficiência: tem deficiência intelectual?/ tem alguma deficiência física?/ tem deficiência auditiva?/ tem deficiência visual? (Ver: <https://www.ibge.gov.br/estatisticas/sociais/saude/9160-pesquisa-nacional-de-saude.html?=&t=downloads>]. No caso da deficiência a autodeclaração tem dois problemas: (1) a presença de programas de incentivos financeiros para pessoas com deficiência pode fazer com que os indivíduos relatem demais sua deficiência ou (2) devido a frequente estigmatização social, uma deficiência pode ser subnotificada. Não há consenso sobre este assunto. No Brasil, o BPC não se baseia em critérios autorreferidos (CASTRO; MOREIRA; SILVA, 2017). A deficiência é medida a partir de 4 variáveis diferentes na PNS (G001, G006, G014 e G021), na presente análise foi criada uma nova variável, que será utilizada como independente na primeira equação, com 5 categorias: deficiência intelectual, deficiência auditiva, deficiência física, deficiência intelectual e pessoas sem deficiência. 
+
+Na tentativa de separar os efeitos da discriminação e da menor produtividade sobre o salário, alguns estudos analisam separadamente as informações das pessoas com deficiência que possuem limitações das atividades habituais e das que não possuem tais limitações e a evidência mais forte de discriminação do empregador contra trabalhadores com deficiência vem de modelos que controlam os efeitos limitantes da deficiência na produtividade do trabalhador (BALDWIN, 1993; BECKER, 2019). 
+
+No entanto, existe discordância sobre a adequação de incluir os efeitos limitantes das deficiências nos modelos. O movimento social das pessoas com deficiência enfatiza suas habilidades ao invés de suas limitações e um modelo que associa deficiência a perdas de produtividade é contrário às premissas do movimento. Por outro lado, estimativas significativas de discriminação salarial não podem incluir os efeitos das diferenças reais na produtividades, os economistas dizem que a discriminação salarial ocorre quando as diferenças nos salários médios de dois grupos de trabalhadores não são explicadas por diferenças em sua produtividade média. As diferenças salariais discriminatórias não desaparecem quando os controles funcionais são incluídos na equação salarial. Quanto melhor controlarmos as diferenças de produtividade associadas a restrições físicas, mentais e de saúde, mais convincentes serão as evidências de que os trabalhadores com deficiência estão sujeitos à discriminação salarial e merecem a proteção das leis de direitos civis (BALDWIN, 1993). 
+
+Para levar em conta tanto as críticas do movimento quanto as recomendações dos economistas faço uma segunda equação que diferencia dentro do grupo de pessoas com deficiência quais são as que possuem limitações, utilizando as limitações e a variável que identifica o estado de saúde (N001) como variáveis independentes. A variável de limitação foi criada a partir de outras quatro variáveis da PNS (G004, G009, G017, G026) e possui quatro categorias: não limita, limita um pouco, limita moderadamente e limita intensamente. As respostas que se referem a limitação na PNS também são autorreferidas  “em geral, em que grau a deficiência limita as atividades habituais (como ir à escola, brincar, trabalhar, etc.)”.
+
+A variável de renda será formulada a partir de quatro variáveis da PNS (E01602, E01604, E01802 e E01804) que levam em conta o salário do indivíduo no trabalho principal e no trabalho secundário. A renda proveniente do salário é utilizada como dependente nas regressões desse estudo. O questionário da pesquisa considera a condição em relação à força de trabalho, na semana de referência, para pessoas de 14 anos ou mais de idade, por isso é possível que pessoas a partir de 14 anos possam ter renda proveniente do seu trabalho. Sendo assim, aplico um filtro na análise para considerar apenas as pessoas que tem 14 anos de idade ou mais, com esse filtro o banco de dados passa a ter 160.902 observações.
+
+### 3.3 Variáveis de controle
+
+A variável de rendimento domiciliar, que inclui aposentadoria ou pensão de instituto de previdência federal (INSS), estadual, municipal ou do governo federal, estadual, municipal, pensão alimentícia ou doação, juros de aplicações, aluguel ou arrendamento, programas sociais, seguro-desemprego, seguro defeso ou outros rendimentos domiciliares, será utilizada como variável de controle no modelo. 
+
+A deficiência pode afetar a educação e o trabalho dos indivíduos, além disso no mercado brasileiro de trabalho, o aumento do setor terciário desde a década de 1970  foi acompanhado por um aumento médio da escolaridade dos trabalhadores (MITRA; POSARAC; VICK, 2011; CASTRO; MOREIRA; SILVA, 2017; BECKER, 2019; SILVEIRA et al, 2020). Essas variáveis também devem ser levadas em consideração na análise e para isso serão utilizadas como variáveis de controle. A PNS tem uma variável (VDE001) que permite identificar se o indivíduo maior de 14 anos estava dentro ou fora da força de trabalho na semana de referência da pesquisa. Já a variável que identifica a escolaridade (VDD004) é dividida em 7 categorias: sem instrução, fundamental completo, fundamental incompleto, ensino médio completo, ensino médio incompleto, superior completo e superior incompleto. 
+
+A posição ocupacional alcançada pelo indivíduo é associada à variáveis da chamada “origem socioeconômica” como nacionalidade, status migratório, gênero e raça. O efeitos da origem socioeconômica podem ser observados no mercado de trabalho, onde grupos de raça e gênero se concentram em determinadas ocupações. A definição salarial de um indivíduo decorre de três fatores: formação, inserção e definição salarial. A diferença salarial dos homens negros com relação aos homens brancos se deve a menor escolaridade e inserção em ocupações de menor prestígio, principalmente manuais. Para as mulheres brancas, pesam os dois últimos fatores, dado que elas se encontram em ocupações intermediárias e, mesmo com maior escolaridade e ocupando os mesmos cargos, recebem menos. Por fim, as mulheres negras sofrem com os três fatores da definição salarial (SILVEIRA et al, 2020). A PNS permite identificar o sexo do respondente através da variável (C006), uma variável binária com duas categorias: masculino e feminino. A raça pode ser identificada a partir da variável (C009), na análise ela será transformada em variável binária com as categorias branco e não-branco (BECKER, 2019). 
+
+A variável de localização identifica a região que o indivíduo mora, é incluída na análise como controle e possui cinco categorias: Norte, Nordeste, Sul, Sudeste e Centro-Oeste. A inclusão da variável de região no modelo é importante pelo fato de que nas regiões Sul e Sudeste do país a média salarial é maior (BECKER, 2019; SILVEIRA et al, 2020). 
+
+### 3.4 Modelo
+
+Os modelos de regressão de mínimos quadrados ordinários (MQO) são os principais modelos estatísticos utilizados por analistas de dados nas ciências sociais. Com a regressão é possível estimar o grau de associação entre uma variável dependente Y e um  conjunto de variáveis independentes  Xi (explicativas). A correlação é resumida em termos da direção (positiva ou negativa) e magnitude (fraca ou forte) da associação, ou seja, é possível utilizar as variáveis independentes para predizer os valores da variável dependente (FIGUEIREDO FILHO et al, 2011; KELLSTEDT; WHITTEN, 2018). 
+
+Para testar a primeira hipótese, a estratégia empírica deste estudo é estimar equações de rendimento pelo método MQO. A H1 pode ser descrita da seguinte forma:
+H1: a deficiência causa um impacto negativo na renda (salário) dos indivíduos.
+
+Em primeiro lugar, será feita uma equação em que a variável dependente é a renda proveniente do salário, como variável independente de interesse será utilizada a variável que identifica a deficiência com cinco categorias: intelectual, física, auditiva, visual e sem deficiência. As demais variáveis são utilizadas como controle. Esquematicamente, o modelo estimado da equação 1 é o seguinte: 
+$$Y = α + β1X1 + β2X2 + β3X3 + β4X4 + β5X5 + β6X6 + β7X7 + β8X8 + ϵ$$
+
+Onde, Y é a renda proveniente do salário, X1, a deficiência, X2 é a idade, X3, o sexo,  X4 representa o trabalho, X5, a escolaridade, X6, o rendimento domiciliar, X7, a cor/raça e X8, a região. O intercepto (α), representa o valor da renda quando as outras variáveis assumem valor zero. Os coeficientes de regressão (β) representam a mudança observada na renda associada ao aumento de uma unidade nas variáveis Xi. Finalmente, o termo estocástico (ϵ) representa o erro em explicar/entender/predizer a renda a partir das variáveis Xi. Em particular, ϵ é a diferença entre os valores observados e os valores preditos de Y, ou seja, os resíduos do modelo. Quanto menor  forem os resíduos encontrados, melhor é o ajuste do modelo à realidade a ser explicada (FIGUEIREDO FILHO et al, 2011). 
+
+A segunda equação utiliza a variável de limitação como independente principal. Em relação ao modelo anterior as mudanças são: (1) a variável X1 passa a representar a limitação decorrente da deficiência e (2) é acrescentada uma variável X9 que identifica o estado de saúde do indivíduo. Esquematicamente, a equação é a seguinte: 
+$$Y = α + β1X1 + β2X2 + β3X3 + β4X4 + β5X5 + β6X6 + β7X7 + β8X8 + β9X9 + ϵ$$
+A segunda equação é baseada na hipótese 2 (H2): existe diferença no impacto causado na renda dos indivíduos com deficiência de acordo com o nível de limitação decorrente da deficiência. 
+
+O efeito da deficiência pode ser diferente entre os gêneros, pois os impactos de limitações específicas podem ser distintos: o trabalho dos homens pode ser mais afetado pela perda de mobilidade e força; o trabalho das mulheres pode depender mais da capacidade sensorial e da aparência (CASTRO; MOREIRA; SILVA, 2017). Para levar este efeito em conta será feita uma terceira equação com uma interação entre as variáveis “sexo” e “deficiência”, baseada na hipótese 3 (H3): o efeito da deficiência na renda muda de acordo com o gênero. 
+
+Os modelos interativos são utilizados para testar teorias sobre como os efeitos de uma variável independente na variável dependente (nesse caso, renda) podem ser contingentes no valor de outra variável independente. Aqui, a hipótese que se deseja testar deve ser de natureza condicional. A hipótese condicional é aquela em que uma relação entre duas ou mais variáveis depende do valor de outra(s) variável(s), o efeito da variável independente X na variável dependente Y depende de alguma terceira variável Z. No modelo interativo deve-se incluir todos os termos constitutivos, os termos constitutivos não devem ser interpretados como se fossem efeitos marginais incondicionais e os efeitos marginais e erros padrão substantivamente significativos devem ser calculados (BRAMBOR; CLARK; GOLDER, 2006; KELLSTEDT; WHITTEN, 2018). O modelo interativo do presente trabalho é o seguinte:
+$$Y = α + β1X1 + β2X2 + β3X3 + β4X4 + β5X5 + β6X6 + β7X7 + β8X8 + β13X1X3+ ϵ$$
+
+Onde, Y é a renda proveniente do salário, X1, a deficiência, X2 é a idade, X3, o sexo,  X4, representa o trabalho, X5, a escolaridade, X6, o rendimento domiciliar, X7, a cor, e X8, a região. O intercepto (α), representa o valor da renda quando as outras variáveis assumem valor zero. Os coeficientes de regressão (β) representam a mudança observada na renda associada ao aumento de uma unidade nas variáveis Xi. No entanto os coeficientes  β1 e β3 não representam o efeito médio de X1 ou de X3 em Y; eles apenas indicam o efeito de X1 ou de X3 quando X3 e X1 forem zero, respectivamente. Sendo assim não se pode interpretar os coeficientes dos termos de interação da mesma maneira que se interpreta nos modelos aditivos (BRAMBOR; CLARK; GOLDER, 2006). O termo estocástico (ϵ) representa o erro da equação. 
+
+Depois de feitas as equações, o passo seguinte é verificar em que medida os dados disponíveis satisfazem os pressupostos da análise de regressão de MQO, a violação de cada pressuposto está associada a um determinado problema. Nos resultados serão reportadas as técnicas utilizadas para corrigir eventuais violações dos pressupostos  (transformações, modificações, etc.) (FIGUEIREDO FILHO et al, 2011).
+
+Os pressupostos que precisam ser satisfeitos para que a análise de regressão MQO possa ser adequadamente utilizada, são: (1) a relação entre a variável dependente e as variáveis independentes deve ser linear, a violação desse pressuposto impede que a estimação por MQO produza o melhor estimador linear não-viesado; (2) as variáveis foram medidas adequadamente, ou seja, assume-se que não há erro sistemático de mensuração. Variáveis mal medidas produzem estimativas (intercepto e coeficiente de regressão) viesadas. Além disso, os testes de significância e o intervalo de confiança são afetados; (3) a expectativa da média do termo de erro (ϵ) é igual a zero, os fatores não incluídos no modelo (que compõem o termo de erro) não afetam sistematicamente o valor médio de Y. Quando esse pressuposto é violado a consistência da estimativa do intercepto é comprometida; (4) homocedasticidade: a variância do termo de erro é constante para os diferentes valores da variável independente, ou seja, a diferença entre os resultados observados e os resultados preditos pelo modelo devem variar uniformemente. A violação desse pressuposto afeta a confiabilidade dos testes de significância e intervalos de confiança; (5) ausência de autocorrelação, ou seja, os termos de erros são independentes entre si. A autocorrelação causa problemas na confiabilidade dos testes de significância e intervalos de confiança; (6) a variável independente não deve ser correlacionada com o termo de erro, é preciso incorporar todas as variáveis teoricamente importantes ao modelo explicativo para que as estimativas não sejam viesadas; (7) nenhuma variável teoricamente relevante para explicar Y foi deixada de fora do modelo e nenhuma variável irrelevante para explicar Y foi incluída no modelo; (8) as variáveis independentes não apresentam alta correlação, o chamado pressuposto da não multicolinearidade. Quanto maior for a multicolinearidade, menos informação estará disponível para calcular as estimativas dos coeficientes; (9) assume-se que o termo de erro tem uma distribuição normal, para que os estimadores de β1, β2 e σ (sigma) encontrados a partir do método de mínimos quadrados ordinários sejam não-viesados e eficientes, e (10) há uma adequada proporção entre o número de casos e o número de parâmetros estimados. Como o algoritmo computacional inverte a matriz para realizar os cálculos, caso o número de parâmetros a serem estimados supere a quantidade de observações, a estimação torna-se matematicamente impossível (FIGUEIREDO FILHO et al, 2011).
+
+## 4 Estatísticas Descritivas 
+
+A amostra é composta por 160.902 observações, de pessoas com 14 anos ou mais de idade, observadas da PNS de 2013. Desse total, 92% não possuem deficiência, 0,77% possuem deficiência intelectual, 3,88% deficiência visual, 1,38% deficiência física e 1,84% deficiência auditiva. Abaixo estão descritas as quantidades de pessoas em cada categoria da variável. No gráfico da Figura 2 é possível observar esses dados. 
+
+```{r}
+
+
+table(filtrado_idade$deficiencia)
+
+#nenhuma 
+(148207/160902)*100
+#auditiva 
+(2969/160902)*100
+#fisica 
+(2227/160902)*100
+#intelectual 
+(1253/160902)*100
+#visual 
+(6246/160902)*100
+
+
+ggplot(filtrado_idade, aes(deficiencia, ..count../sum(..count..) )) +
+  geom_bar(na.rm = T) +
+  scale_y_continuous(labels = percent)+
+  labs(title = "Figura 2",
+subtitle = "Gráfico de Barras",
+x = "Tipos de deficiência",
+y = "Porcentagem",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+theme_classic () 
+
+``` 
+
+Entre as pessoas com deficiência a distribuição das pessoas de acordo com a categoria do grau de limitação da deficiência é: 2,73% declararam que a deficiência não limita, 1,94%, que limita um pouco, 1,36%, que limita moderadamente e 1,84% responderam que a deficiência limita intensamente a realização das atividades habituais. Abaixo estão descritas as quantidades de pessoas em cada categoria da variável de limitação. A Figura 3 demonstra esses dados num gráfico de barras. 
+
+```{r}
+
+table(filtrado_idade$limita)
+
+
+#não limita     
+(4395/160902)*100
+#um pouco 
+(3135/160902)*100
+#moderadamente    
+(2196/160902)*100
+#intensamente 
+(2969/160902)*100
+
+ggplot(filtrado_idade, aes(limita, ..count../sum(..count..))) +
+  geom_bar(na.rm = T) +
+  scale_y_continuous(labels = percent)+
+  labs(title = "Figura 3",
+subtitle = "Gráfico de Barras",
+x = "Limitação decorrente da deficiência",
+y = "Porcentagem",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic () 
+
 
 ```
 
-### Pressupostos da regressão H1
+No caso da variável renda a média é 939,70 reais, a mediana é igual a 400 reais, ou seja, 50% dos respondentes tem um rendimento bruto mensal menor que 400 reais. O terceiro quartil é igual a mil reais, ou seja, 75% das pessoas tem um rendimento menor que esse valor. De acordo com a Figura 4, o rendimento mensal máximo da distribuição é de 400.000 reais. 
 
 ```{r}
+
+summary(filtrado_idade$salario)
+
+ggplot(filtrado_idade, aes("",salario)) +
+  geom_boxplot()+
+  labs(title = "Figura 4",
+subtitle = "Gráfico de Box-Plot",
+x = "",
+y = "Rendimento bruto mensal",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic () 
+
+```
+
+Ao comparar a renda com a deficiência, a média de salarial de todas as categorias fica abaixo de mil reais. Na categoria dos que não têm deficiência a média salarial é 971,41 reais, na categoria de deficiência auditiva, é 	573,30 reais, para os deficientes físicos, é 422,04 reais, os deficientes intelectuais têm em média um rendimento bruto mensal de 40,13 reais e os deficiente visuais têm em média um rendimento de 727,60 reais. De acordo com o gráfico da Figura 5 a observação que indica o rendimento mensal de 400.000 reais, como foi observado na Figura 4, pertence a categoria das pessoas que não têm deficiência. O rendimento máximo da categoria de pessoas com deficiência visual é de 100.000 reais, já a categoria da deficiência intelectual possui um rendimento máximo de 2.500 reais, na deficiência física esse valor é de 21.000 reais	e na auditiva é de 25.000	reais. 
+
+```{r}
+
+banco_descritivo <- filtrado_idade %>%
+  group_by (deficiencia) %>%
+   summarise (media = mean(salario, na.rm = TRUE), 
+              mediana = median(salario, na.rm = TRUE), 
+              minimo = min(salario, na.rm = TRUE),
+              maximo = max(salario, na.rm = TRUE),
+              desvio = sd(salario, na.rm = TRUE),
+              .groups = 'drop')           
+   
+
+ggplot(filtrado_idade, aes(deficiencia, salario)) +
+geom_boxplot ()+
+  labs(title = "Figura 5",
+subtitle = "Gráfico de Box-Plot",
+x = "Tipos de deficiência",
+y = "Rendimento bruto mensal",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic () 
+
+```
+
+Esses resultados descritivos sem nenhum controle demonstram que existe uma diferença na remuneração de acordo com o tipo de deficiência e que a diferença também é significativa entre as pessoas com deficiência e as que não têm deficiência. Sendo assim é necessário avaliar os dados com maior precisão. 
+
+## 5 Resultados
+
+A descrição dos resultados está organizada em três seções. A primeira seção discute os resultados do teste de hipótese 1. A segunda, apresenta os resultados do teste de hipótese 2. Por fim, a terceira seção discute os resultados do teste de hipótese 3, que utiliza o modelo interativo. 
+
+### 5.1 Teste de Hipótese 1
+
+De acordo com os gráficos de *Cook's distance* e *Residuals vs Leverage*, que se encontram abaixo, o modelo que testa a H1 apresenta três observações influentes, que foram retiradas para, em seguida, ser feita uma segunda regressão.  
+
+```{r}
+
 # Regressão 1, com a variável de deficiencia como dependente.
 # Fazer interação entre cor e sexo 
 
 regressao1 <- lm (salario ~ deficiencia + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao, data = filtrado_idade)
-
-summary(regressao1)
-confint(regressao1)
 
 # Outlier/Observação influente = 137068 (influente), 111090 e 111104 (outliers) 
 
@@ -422,31 +452,77 @@ plot (regressao1, 4)
 
 plot (regressao1, 5)
 
-outlierTest(regressao1)
-
 # Retirar as observações influentes de acordo com o plot 5
 
 regressao2 <- lm (salario ~ deficiencia + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao, data = filtrado_idade [-c(111104, 137068, 111090),])
-summary(regressao2)
+
+# Intervalos de confiança 
+
+confint(regressao1)
+
 confint(regressao2)
+
+```
+
+Acima, os intervalos de confiança^[Ao interpretar o intervalo de confiança devemos considerar apenas aqueles que não passam pelo 0 como estatisticamente significantes, na Figura 6 esse marco é representado pela linha pontilhada.] dos dois modelos são retratados para cada variável, em primeiro lugar aparecem os intervalos de confiança do modelo com as observações influentes e depois sem as observações influentes. Na Figura 6 é possível ver a comparação dos intervalos de confiança dos dois modelos, o *model 1* é o que possui as observações influentes, o *model 2* não as tem. Os intervalos de confiança dos dois modelos sofrem pouca variação, mas sem tais observações a renda domiciliar passa a ser estatisticamente significante ^[O presente artigo adota como nível de significância < 0,05, desconsiderando o nível de significância < 0,10], ou seja, passa a causar um impacto negativo no rendimento médio mensal bruto.  
+
+```{r}
+
+dwplot (list (regressao1, regressao2), vline = geom_vline(xintercept = 0, linetype = "dashed"), by_2sd = T) +
+  labs(title = "Figura 6",
+subtitle = "Gráfico: Intervalos de Confiança",
+x = "",
+y = "",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic () 
+
+```
+
+A tabela 1 compara os dois modelos, o modelo 1 é o que possui as observações influentes e o modelo 2 não tem tais observações. A primeira regressão explica 17% da variação (R2) no rendimento, com a correção de observações influentes o modelo passa a explicar 24% dessa variação. Na comparação também é possível perceber que o erro padrão (*Residual Std. Error*) diminui de 2.466 para 1.959, demonstrando que o modelo 2 tem melhor desempenho quando se trata precisão no cálculo da média populacional. 
+
+No caso da variável de interesse que indica a existência da deficiência, nos dois modelos, apenas a deficiência intelectual não demonstra ter uma diferença estatisticamente significante em relação ao rendimento das pessoas que não possuem nenhuma deficiência. As deficiências auditiva, física e visual causam um impacto negativo no rendimento, de -220, -214 e -104 reais (modelo 1), respectivamente, no segundo modelo esse impacto passa a ser de -198 reais na deficiência auditiva, -198 na física e -91 na visual. No caso do sexo, a tabela 1 demonstra que ser do sexo femino causa um impacto negativo de -448 (modelo 1) e -436 (modelo 2) reais no rendimento em relação ao sexo masculino. A figura 7 demonstra as estimativas dessas variáveis para o segundo modelo, reforçando que os intervalos de confiança do sexo masculino e feminino se sobrepõem nas categorias "nenhuma" e "deficiência intelectual" e, por isso, não é possível demonstrar a diferença significativa entre tais categorias. 
+
+No caso das pessoas que não trabalham o impacto é de -1.167 reais, no modelo 1, e -1.152 no modelo 2. Quanto maior a idade, maior é a renda. Na variável de escolaridade é possível notar que todas as categorias de estudo são estatisticamente diferentes da categoria de pessoas sem instrução, sendo o impacto de uma pessoa que possui algum nível de escolaridade positivo no rendimento. Quanto maior o nível educacional, maiores são os salários, especialmente para aqueles que têm ensino superior (BECKER, 2019). O impacto das pessoas que têm ensino superior completo na renda é o maior em comparação às outras categorias, no modelo 1 é de 2,529 reais e no modelo 2 de 2,493 reais. Em relação aos brancos, os não brancos causam um impacto negativo de -216 (modelo 1) e -210 (modelo 2) reais no rendimento. No caso da região de moradia, ser da região Norte, Sudeste, Sul ou Centro-Oeste impacta positivamente na renda em comparação com a região Nordeste. 
+
+``` {r results='asis'}
+
+stargazer(list(regressao1,
+               regressao2),
+          type="html", title = "Tabela 1")
+
+
+plot_model(regressao2, type = "pred", 
+           terms = c("deficiencia", "sexo"), 
+           ci.lvl = 0.95)+
+labs(title = "Figura 7",
+subtitle = "Gráfico: Intervalos de Confiança do Modelo 2",
+x = "Tipos de deficiência",
+y = "Rendimento bruto mensal",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic () 
+
+```
+ 
+Os resultados abaixo são dos testes de pressupostos da regressão, aqui apenas o segundo modelo sem as observações influentes foi analisado para cada pressuposto. O gráfico *Scale-Location* demonstra o resultado de um teste de Homocedasticidade, nele a distribuição dos pontos deve ser uniforme para cima e para baixo e também uniforme ao longo de todo o eixo X. Pelo gráfico vemos que esse pressuposto não é satisfeito. A hipótese nula no *Non-constant Variance Score (NCV)* é a presença de homocedasticidade. Assim, o resultado desejado é um p-valor alto, onde não podemos rejeitar a hipótese nula. No caso do resultado demonstrado abaixo o NCV aponta a presença de heterocedasticidade. Devido a heterocedasticidade do modelo o uso do *t test of coefficients* é feito para corrigir as estimativas dos parâmetros, abaixo esses parâmetros são descritos mais detalhadamente. De acordo com esse resultado o rendimento domiciliar deixa de ser estatisticamente significativo, diferentemente do resultado do segundo modelo sem a correção da heterocedasticidade. 
+ 
+```{r}
+
+# Pressupostos da regressão H1
 
 # Homocedasticidade (Pressupostos sobre o componente estocástico da população) - o teste demonstra heterocedasticidade - Para resolver a heterocedasticidade: o resultado do p-valor do teste abaixo (coeftest) é mais confiável, ele ajusta os p-valores de acordo com os erros de cada observação. 
 
 plot(regressao2, 3)
 
-library(lmtest)
-
-bptest(regressao2)
-
-library(car)
-
 ncvTest(regressao2) 
-
-library(sandwich)
 
 coeftest(regressao2, 
          vcov = vcovHC(regressao2, type = "HC3"))
 
+``` 
+
+O gráfico *Residuals vs Fitted* apresenta o resultado do teste de linearidade, o gráfico não deve apresentar nenhum padrão, ou seja, a linha vermelha deverá ser horizontal próxima da linha pontilhada que cruza o eixo Y no valor 0. Abaixo é possível observar que o pressuposto é satisfeito. Para testar a autocorrelação entre as observações, e consequentemente entre os resíduos, é utilizado o gráfico *Series regressao2$residuals* e o teste de *Durbin-Watson* (aqui o p-valor deve ser alto para que não seja possível rejeitar a hipótese nula), de acordo com os resultados dos dois testes abaixo vemos que esse pressuposto não é atendido e que o modelo 2 apresenta autocorrelação. O gráfico Normal Q-Q representa a normalidade dos resíduos, nele devemos observar se os pontos estão próximos da linha tracejada, no gráfico vemos que o pressuposto não é cumprido. O teste *Variance inflation factor (VIF)* verifica a presença de multicolinearidade, o valor mínimo de resultado do VIF, quando uma variável não possui multicolinearidade, é 1. Quanto maior o valor, maior a multicolinearidade. Não existe um valor objetivo para definir o quão grave é a multicolinearidade. No resultado abaixo todas as variáveis têm um valor próximo de 1, indicando que a multicolinearidade não é grave. Além disso, o problema da multicolinearidade é um problema dos dados que poderia ser chamado de micronumerosidade. Se o N for pequeno a multicolinearidade é um problema, mas se o N for grande o problema não é grave (KELLSTEDT; WHITTEN, 2018). A estratégia para resolver o problema da multicolinearidade é aumentar o N, algo que não pode ser feito no caso desta pesquisa. 
+
+```{r}
 # Linearidade (pressuposto sobre a especificação do modelo) - OK 
 
 plot(regressao2, 1)
@@ -462,21 +538,20 @@ plot(regressao2, 2)
 
 # Multicolinearidade (pressuposto sobre o componente estocástico da população) - O VIF não chega nem perto de 4, mas não existe um valor objetivo para definir o quão grave é a multicolinearidade, o 4 é apenas um parâmetro. A solução da multicolinearidade é aumentar o N, no caso dos dados isso não é possível. 
 
-library (car)
 vif (regressao2)
 
 ``` 
 
-### Pressupostos da regressão que testa a H2
+### 5.2 Teste de Hipótese 2
+
+No teste de Hipótese 2 que utiliza a variável de limitação como dependente de interesse, foi observado que o modelo apresenta três observações influentes (olhar os gráficos: *Cook's distance* e *Residuals vs Leverage*, que se encontram abaixo). As observações foram retiradas para, em seguida, ser feita uma segunda regressão.  
 
 ```{r}
+
 # Regressão 3, com a variável de limitação como dependente
 
 regressao3 <- lm (salario ~ limita + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao + estadosaude, 
                   data = filtrado_idade)
-
-summary(regressao3)
-confint(regressao3)
 
 # Outlier/Observação influente = 101225 (outlier), 135443 e 148567 (influentes)
 
@@ -484,29 +559,71 @@ plot (regressao3, 4)
 
 plot (regressao3, 5)
 
-outlierTest(regressao3)
 
 # Retirar as observações influentes de acordo com o plot 5
 
 regressao4 <- lm (salario ~ limita + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao + estadosaude, data = filtrado_idade [-c(101225, 135443, 148567), ] )
-summary(regressao4)
+
+# Intervalos de confiança
+
+confint(regressao3)
 confint(regressao4)
+
+
+```
+
+A Figura 8, demonstra a comparação dos intervalos de confiança dos dois modelos, o *model 1* é o que possui as observações influentes, o *model 2* não tem tais observações. É possível notar que os intervalos de confiança não variam muito entre os dois modelos, mas algumas mudanças acontecem nas estimativas das variáveis: (1) a renda domiciliar passa a ser estatisticamente significante no segundo modelo; (2) a região Centro-Oeste deixa de ser estatisticamente diferente da região Nordeste no modelo 2; e (3) o estado de saúde ruim passa a ser estatisticamente diferente do estado de sáude muito bom. O impacto do estado de saúde na renda pode ser explicado pelo fato de que o número de dias que a pessoa deixou de realizar as atividades habituais por motivo de saúde diminui a probabilidade de participação no mercado de trabalho para todos os grupos (BECKER, 2019).
+
+```{r}
+
+dwplot (list (regressao3, regressao4), vline = geom_vline(xintercept = 0, linetype = "dashed"), by_2sd = T) +
+  labs(title = "Figura 8",
+subtitle = "Gráfico: Intervalos de Confiança",
+x = "",
+y = "",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic ()
+
+```
+
+Na tabela 2 podemos ver as estimativas das variáveis de forma mais detalhada. O modelo 1 é o que possui as observações influentes e o modelo 2 não tem tais observações. A primeira regressão explica 31% da variação (R2) no rendimento, com a correção de observações influentes o modelo passa a explicar 34% dessa variação. Na comparação também é possível perceber que o erro padrão (*Residual Std. Error*) diminui de 1.520 para 1.345. Aqui vale ressaltar que a amostra é significativamente menor que no teste de hipótese 1, pois essas regressões só levam em conta os respondentes que têm deficiência e por isso responderam em relação as suas limitações. A amostra do primeiro modelo é composta de 5.524 observações e, no modelo 2, quando retiradas as observações influentes, passa a ser de 5.521. 
+
+No caso da variável dependente de limitação a categoria de referência é a que indica que a deficiência não limita a realização das atividades habituais. Em ambos os modelos as categorias de limitação causam um impacto negativo estatisticamente significante na renda das pessoas. Na categoria de pouca limitação o impacto é de -163 reais no primeiro modelo e -129 reais no segundo modelo. Quando a limitação é moderada o impacto é de -160 (modelo 1) e -127 (modelo 2) reais. Se a limitação é intensa o impacto na renda passa a ser de -164 (modelo 1) e -135 (modelo 2) reais. Ser do sexo feminino causa um impacto negativo de  -306 (modelo 1) e -288 (modelo 2) reais no rendimento do indivíduo. Nos dois modelos quanto maior a idade, maior é a renda. As pessoas que não trabalham, quando comparadas as que trabalham, causam um impacto negativo na renda de -1.266(modelo 1)/ -1,203 (modelo 2) reais. As pessoas que possuem ensino fundamental completo/incompleto e ensino médio incompleto não apresentam diferença de impacto na renda em relação aos que não têm instrução, diferentemente do teste de hipótese 1. As pessoas que não são brancas estão em desvantagem em relação às brancas, no modelo 1 o impacto negativo de ser não branco é de -136 reais, no modelo 2, de -144 reais. Nos dois modelos as regiões Sul e Norte não são estatisticamente distintas da região Nordeste, apenas a região Sudeste impacta positivamente na renda em relação à região Nordeste. 
+
+```{r results='asis'}
+
+stargazer(list(regressao3,
+               regressao4),
+          type="html", title = "Tabela 2")
+
+
+```
+
+
+Os resultados abaixo são dos testes de pressupostos do modelo sem as observações influentes. De acordo com o gráfico *Scale-Location* e com o teste NCV (p = < 2.22e-16) o modelo em questão apresenta heterocedasticidade. Os resultados do *t test of coefficients* ajustam os parâmetros devido à presença da heterocedasticidade, a renda domiciliar deixa de ser estatisticamente significante, a região Centro-Oeste volta a ser estatisticamente diferente da região Nordeste e os estado de saúde ruim e bom perdem a significância estatística, ou seja, deixam de impactar na renda. 
+
+```{r}
+
+# Pressupostos da regressão que testa a H2
 
 # Homocedasticidade - (Pressupostos sobre o componente estocástico da população) - o teste demonstra heterocedasticidade - Para resolver a heterocedasticidade: o resultado do p-valor do teste abaixo (coeftest) é mais confiável, ele ajusta os p-valores de acordo com os erros de cada observação.
 
 plot(regressao4, 3)
-
-bptest(regressao4)
 
 ncvTest(regressao4) 
 
 coeftest(regressao4, 
          vcov = vcovHC(regressao4, type = "HC3"))
 
+```
+
+O gráfico *Residuals vs Fitted* abaixo demonstra que o modelo satisfaz o pressuposto de linearidade. O gráfico *Series regressao4$residuals* e o teste de *Durbin-Watson* demonstram que o modelo não apresenta autocorrelação entre casos/resíduos. O resultado do gráfico Normal Q-Q atesta que o modelo não atende o pressuposto de normalidade dos resíduos. De acordo com o resultado do VIF a multicolinearidade tem valores muito próximos de 1, não sendo grave nesse modelo. 
+
+```{r}
+
 # Linearidade (pressuposto sobre a especificação do modelo) - OK
 
 plot(regressao4, 1)
-
 
 # Autocorrelação entre casos/resíduos Pressupostos sobre o componente estocástico da população) - nem a regressão 3 e nem a 4 têm autocorrelação
 
@@ -527,15 +644,15 @@ vif (regressao4)
 
 ```
 
-### Pressupostos da regressão que testa a H3
+### 5.3 Teste de Hipótese 3
+
+Para testar a terceira hipótese, foi utilizado um modelo interativo de regressão que utiliza a interação entre a deficiência e o sexo. De acordo com os gráficos *Cook's distance* e *Residuals vs Leverage*, que se encontram abaixo, o modelo apresentou 3 observações influentes. Elas foram retiradas e foi feita uma nova regressão. 
 
 ```{r}
 
 # Regressão 5 com interação entre sexo e deficiência 
 
 regressao5 <- lm (salario ~ deficiencia + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao + deficiencia * sexo, data = filtrado_idade)
-summary(regressao5)
-confint(regressao5)
 
 # Outlier/Observação influente = 111104 e 111090 (outliers), 137068 (influente)
 
@@ -544,19 +661,69 @@ plot (regressao5, 4)
 plot (regressao5, 5)
 
 
-outlierTest(regressao5)
-
 # Retirar as observações influentes de acordo com o plot 5
 
 regressao6 <- lm (salario ~ deficiencia + idade + sexo + trabalho + escolaridade + renda_domiciliar + cor + regiao + deficiencia * sexo, data = filtrado_idade [-c(111104, 137068, 111090), ])
-summary(regressao6)
+
+#Intervalos de confiança
+
+confint(regressao5)
 confint(regressao6)
+
+```
+
+A Figura 9 demonstra o comparativo dos intervalos de confiança dos dois modelos,o *model 1* é o que possui as observações influentes, o *model 2* não tem tais observações. Pela comparação do gráfico é possível notar que os intervalos de confiança dos dois modelos são bem próximos, a mudança substantiva ocorre apenas em relação à renda domiciliar que passa a ser estatisticamente significante no *model 2*. 
+
+```{r}
+
+dwplot (list (regressao5, regressao6), vline = geom_vline(xintercept = 0, linetype = "dashed"), by_2sd = T) +
+  labs(title = "Figura 9",
+subtitle = "Gráfico: Intervalos de Confiança",
+x = "",
+y = "",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)")+
+  theme_classic ()
+
+```
+
+Na Tabela 3, podemos comparar os resultados dos dois modelos, sendo o primeiro com as observações influentes e o segundo sem tais observações. O primeiro modelo explica aproximadamente 17% (R2) da variação na renda, o segundo modelo explica 24% dessa variação. O erro padrão (*Residual Std. Error*) diminui de 2.466 para 1.959, ou seja, o segundo modelo é melhor ajustado à realidade a ser explicada.
+
+A idade impacta positivamente na renda nos dois modelos, ser das regiões Centro-Oeste, Sul, Norte e Sudeste também provoca esse impacto positivo quando a comparação é feita com a região Nordeste. Em relação às pessoas sem instrução as que têm algum grau de formação estão em vantagem quando se trata do rendimento. As pessoas que não trabalham e não são brancas causam um impacto negativo na renda em comparação às pessoas que trabalham e as que são brancas, respectivamente. 
+
+No caso dos termos de interação "sexo" e "deficiência" a interpretação deve ser feita de outra forma. Pois, os coeficientes em modelos de interação não indicam o efeito médio de uma variável como fazem em um modelo aditivo, dessa forma, é quase certo que eles mudem com a inclusão de um termo de interação e isso não deve ser interpretado como um sinal de multicolinearidade (BRAMBOR; CLARK, 2006). 
+
+A Figura 10 permite que a interação entre as variáveis "sexo" e "deficiência" seja melhor compreendida. Se utilizarmos o nível de confiança de 95%, vemos que não existe uma diferença significativa entre o rendimento de homens e mulheres nas deficiências física e intelectual. As diferenças de rendimento entre os sexos são observadas quando a pessoa têm deficiência visual, auditiva ou quando não é uma pessoa com deficiência. Em outras palavras, ser homem e ter deficiência visual, auditiva ou não ter deficiência significa ter um rendimento maior que as mulheres desses grupos.  
+
+```{r results='asis'}
+
+stargazer(list(regressao5,
+               regressao6),
+          type="html", title = "Tabela 3" )
+
+
+plot_model(regressao6, type = "pred", 
+           terms = c("deficiencia", "sexo"), 
+           ci.lvl = 0.95)+
+labs(title = "Figura 10",
+subtitle = "Gráfico: Variáveis de Interação",
+x = "Tipos de deficiência",
+y = "Rendimento bruto mensal",
+caption = "Elaboração própria a partir da PNS (IBGE/2013)") +
+  theme_classic ()
+
+```
+
+Os resultados abaixo são dos testes de pressupostos do modelo sem as observações influentes. De acordo com o gráfico *Scale-Location* e com o teste NCV (p = < 2.22e-16) o modelo apresenta heterocedasticidade. Os resultados do *t test of coefficients* indicam que a renda domiciliar deixa de ser estatisticamente significante. O gráfico *Residuals vs Fitted* abaixo demonstra que o modelo satisfaz o pressuposto de linearidade. O gráfico *Series regressao6$residuals* e o teste de *Durbin-Watson* (p-value = 0) demonstram que o modelo apresenta autocorrelação entre casos/resíduos. O resultado do gráfico Normal Q-Q atesta que o modelo não atende o pressuposto de normalidade dos resíduos. 
+
+Os coeficientes num modelo interativo de regressão mudam com a inclusão de um termo de interação e isso não deve ser interpretado como um sinal de multicolinearidade (BRAMBOR; CLARK, 2006). No resultado do VIF abaixo é possível notar que o VIF da varíavel de deficiência é acima de 13, num modelo aditivo esse valor seria preocupante, mas não é o caso da regressão em questão. 
+
+```{r}
+
+# Pressupostos da regressão que testa a H3
 
 # Homocedasticidade (Pressupostos sobre o componente estocástico da população) - o teste demonstra heterocedasticidade - Para resolver a heterocedasticidade: o resultado do p-valor do teste abaixo (coeftest) é mais confiável, ele ajusta os p-valores de acordo com os erros de cada observação.
 
 plot(regressao6, 3)
-
-bptest(regressao6)
 
 ncvTest(regressao6) 
 
@@ -583,9 +750,97 @@ plot(regressao6, 2)
 
 # Multicolinearidade (pressuposto sobre o componente estocástico da população) -  Não existe um valor objetivo para definir o quão grave é a multicolinearidade, o 4 é apenas um parâmetro. A solução da multicolinearidade é aumentar o N, no caso dos dados isso não é possível. Nessa regressão a deficiência apresenta alta multicolinearide devido à interação. 
 
-library (car)
 vif (regressao6)
 
-
-
 ``` 
+
+A primeira hipótese do presente artigo afirma que a deficiência causa um impacto negativo na renda (salário) dos indivíduos. Para testar essa alegação foi feita uma equação na qual a deficiência foi dividida em cinco categorias: deficiência intelectual, física, auditiva, visual e sem deficiência. A deficiência intelectual não apresentou resultados conclusivos em relação a esse impacto negativo e a hipótese nula de que esse impacto não ocorre não pode ser descartada. 
+
+A hipótese 2 afirma que existe diferença no impacto causado na renda das PCDs de acordo com o nível de limitação decorrente da deficiência. Os dados comprovam que essa diferença existe. As PCDs que têm limitações das atividades habituais estão em desvantagem em relação às PCDs sem limitações quando se trata do salário. 
+
+A última hipótese (H3) alega que o efeito da deficiência na renda muda de acordo com o gênero. Para testá-la foi feita uma regressão interativa utilizando “sexo” e “deficiência” como os termos de interação. Existe uma diferença salarial entre homens e mulheres que não têm deficiência, com deficiência auditiva ou visual, sendo o sexo masculino o que tem maiores salários. Para os que têm deficiência física e intelectual essa diferença não ocorre, no caso dessas deficiências os resultados estão de acordo com a literatura que afirma que o trabalho dos homens pode ser mais afetado pela perda de mobilidade e força e o trabalho das mulheres pode depender mais da capacidade sensorial e da aparência (CASTRO; MOREIRA; SILVA, 2017) características que podem ser afetadas nas deficiências intelectual e física. 
+
+## 6 Conclusão 
+
+Este artigo analisou o efeito da deficiência sobre o salário no Brasil. Utilizando os dados da PNS/IBGE (2013), identifiquei que existe diferença no impacto causado pelos tipos de deficiência no rendimento. Além disso, quando foi feito o teste que relaciona a limitação decorrente da deficiência ao rendimento, os resultados demonstraram que as pessoas que apresentam algum tipo de limitação (pouca, moderada ou intensa) estão em desvantagem em relação às pessoas com deficiência que não apresentam limitação das atividades habituais. Quando a variável "sexo" interage com a variável "deficiência" fica demonstrado que existe uma diferença salarial entre homens e mulheres com deficiência auditiva, visual ou pessoas sem deficiência. 
+
+No caso da deficiência intelectual, os resultados não foram conclusivos em relação ao impacto que este tipo de deficiência causa na renda. E, portanto, fica demonstrada a necessidade de estudo multi-método específico sobre a deficiência intelectual, sendo possível até um rastreamento de processos^[“Análise de evidências sobre processos, sequências e conjunturas de eventos dentro de um caso com o propósito de desenvolver ou testar hipóteses sobre mecanismos causais que podem explicar causalmente o caso.”. (BENNETT; CHECKEL, 2015)] para analisar melhor os motivos dessa diferença entre os tipos de deficiência.
+
+No caso dos homens e mulheres com deficiência física e intelectual é válido um estudo mais aprofundado para compreender quais mecanismos anulam o preconceito de gênero nesses grupos e fazem com que não exista uma diferença significativa no salário de homens e mulheres.  
+
+Mesmo que existam políticas públicas para inserção das PCDs no mercado de trabalho, é preciso lembrar da tentativa por parte do poder executivo de acabar com tais políticas em 2019^[Projeto de Lei 6.159/2019, que flexibiliza a Lei de Cotas (Lei 8213, de 1991)] e das inúmeras barreiras ainda existentes na nossa sociedade para a inclusão dessas pessoas.
+
+Dado que existem diferenças entre as distintas deficiências, talvez sejam necessárias políticas específicas para cada categoria e níveis de severidade da deficiência. As PCDs vêm sofrendo ataques no campo dos direitos e das políticas públicas, por isso é urgente que a sociedade se engaje na luta pelos direitos desse segmento assegurando que não aconteçam retrocessos. 
+
+
+## Referências
+
+1. BALDWIN, Marjorie L. Estimating Wage Discrimination against Workers with Disabilities. Cornell JL & Pub. Pol'y, v. 3, p. 276, 1993.
+
+2. BECKER, Kalinca Léia. Como a deficiência afeta a educação e o trabalho de jovens no Brasil. Nova Economia, v. 29, n. 3, p. 1009-1039, 2019.
+
+3. BECKER, Kalinca Léia. Deficiência, emprego e salário no mercado de trabalho brasileiro. Estudos Econômicos (São Paulo), v. 49, n. 1, p. 39-64, 2019.
+
+4. BENNETT, Andrew; CHECKEL, Jeffrey T. Process tracing: From philosophical roots to best practices. Process tracing: From metaphor to analytic tool, p. 3-37, 2015.
+
+5. BRAMBOR, Thomas; CLARK, William Roberts; GOLDER, Matt. Understanding interaction models: Improving empirical analyses. Political analysis, p. 63-82, 2006.
+
+6. BRASIL. INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA (IBGE). Pesquisa Nacional de Saúde 2013-ciclos de vida: Brasil e grandes regiões. 2015. Disponível em: <https://biblioteca.ibge.gov.br/visualizacao/livros/liv94522.pdf>.
+
+7. BRASIL. Lei nº 8.742, de 7 de dezembro de 1993. Disponível em: <http://www.planalto.gov.br/ccivil_03/leis/l8742.htm>.
+
+8. BRASIL. Lei nº 13.146, de 6 de julho de 2015. Disponível em: <http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13146.htm>.
+
+9. BRASIL. Projeto de Lei nº 6159, de 11 de novembro de 2019. Disponível em: <https://www.camara.leg.br/proposicoesWeb/prop_mostrarintegra?codteor=1837451&filename=PL+6159/2019>.
+
+10. CASTRO, Nicole Rennó; MOREIRA, Gustavo Carvalho; SILVA, R. P. Wage differential and disability in Brazil-a productive or discriminatory effect? Encontro Nacional de Economia, 2017. 
+
+11. FIGUEIREDO FILHO, Dalson et al. O que fazer e o que não fazer com a regressão: pressupostos e aplicações do modelo linear de Mínimos Quadrados Ordinários (MQO). Revista Política Hoje, v. 20, n. 1, 2011.
+
+12. HLAVAC, Marek (2018). stargazer: Well-Formatted Regression and Summary Statistics Tables. R package version 5.2.2. https://CRAN.R-project.org/package=stargazer 
+
+13. KELLSTEDT, Paul M.; WHITTEN, Guy D. The fundamentals of political science research. Cambridge University Press, 2018.
+
+14. MITRA, Sophie ; POSARAC, Aleksandra ; VICK, Brandon. Disability and poverty in developing countries: A snapshot from the World Health Survey. World Bank, 2011.
+
+15. SILVEIRA, Leonardo Souza et al. O impacto da segregação ocupacional por gênero e raça na desigualdade de renda no Brasil em três décadas (1986-2015). Revista Latinoamericana de Población, v. 14, n. 27, p. 41-76, 2020.Disponível em: <https://doi.org/10.31406/relap2020.v14.i12.n27.2> 
+
+16. SOUZA JÚNIOR, Paulo Roberto Borges de et al. Desenho da amostra da Pesquisa Nacional de Saúde 2013. Epidemiologia e Serviços de Saúde, v. 24, p. 207-216, 2015.
+
+17. WORLD HEALTH ORGANIZATION (WHO). World report on disability 2011. Disponível em: <https://apps.who.int/iris/bitstream/handle/10665/44575/978856404 7020_por.pdf? sequence=4>.
+
+## Anexo 
+
+### Dicionário de variáveis da PNS 
+
+Utilizadas: 
+Unidade da federação: V0001
+Módulo C: características gerais dos moradores - C001 até C012
+Módulo D: características de educação das pessoas de 5 anos ou mais de idade - D001 até D015
+Módulo E: trabalho dos moradores do domicílio - E001 até E027
+Módulo F: rendimentos domiciliares F001 até VDF00102
+Módulo G: pessoas com deficiências - G001 até G032
+Módulo M: informações para futuros contatos, características de trabalho e apoio social - M001 até M019
+Módulo N: percepção do estado de saúde - N001 até N023
+Módulo W – informações laboratoriais - W00101 até W00408
+Variáveis de amostragem: V0028 até V00293
+Variáveis derivadas do morador: VDD004 (Nível de instrução mais elevado alcançado (pessoas de 5 anos ou mais de idade)); VDE001 (Condição em relação à força de trabalho na semana de referência para pessoas de 14 anos ou mais de idade); VDE002 (Condição de ocupação na semana de referência para pessoas de 14 anos ou mais de idade); VDDATAM (Data de geração do arquivo de microdados. Data ordenada na forma: ano (4 algarismos), mês (2) e dia (2) -  AAAAMMDD)
+
+Retiradas
+V0024: Estrato
+UPA_PNS: UPA
+V0006_PN: Número de ordem do domicílio na PNS
+UPA: Código da UPA das Pesquisas Domiciliares do Sistema Integrado
+V0025: Seleção do morador de 18 anos ou mais para responder o questionário individual
+Módulo I:  cobertura de plano de saúde - I001 até I011
+Módulo J: utilização de serviços de saúde - J001 até J060
+Módulo K:  idosos - K001 até K062 
+Módulo L: crianças com menos de 2 anos - L00201 até L020 
+Módulo O:  acidentes e violências - O001 até O048 
+Módulo P:  estilos de vida - P001 até P072 
+Módulo Q:  doenças crônicas - Q001 até Q137 
+Módulo R: saúde da mulher (mulheres de 18 anos e mais de idade) - R001 até R04903 
+Módulo S: atendimento pré-natal - S001 até S058 
+Módulo U: saúde bucal - U001 até U025 
+Módulo X: atendimento médico - X001 até X02510 
+
